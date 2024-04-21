@@ -2,15 +2,15 @@ package neonc
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 func Filter(list []string) []string {
 	var files_ret []string
 
 	for _, file := range list {
-		if file[len(file)-1:] == "n" {
+		if file[len(file)-2:] == ".n" {
 			files_ret = append(files_ret, file)
 		}
 	}
@@ -29,19 +29,23 @@ func CurrentDirectory() string {
 }
 
 func Walk(directory string) []string {
-	files, err := ioutil.ReadDir(directory)
+	var ret_files []string
 
+	err := filepath.Walk(directory,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			ret_files = append(ret_files, string(path))
+
+			return nil
+		})
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
-	var files_ret []string
-
-	for _, file := range files {
-		files_ret = append(files_ret, file.Name())
-	}
-
-	return files_ret
+	return ret_files
 }
 
 func ReadFile(filepath string) string {

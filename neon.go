@@ -11,13 +11,17 @@ func main() {
 	all_files := neonc.Walk(currentDirectory)
 	files := neonc.Filter(all_files)
 
-	//
-
 	if len(files) < 1 {
+		fmt.Println("No neon files found.")
+
 		return
 	}
 
-	data := string(neonc.ReadFile(currentDirectory + "/" + files[0]))
+	file := files[0]
 
-	fmt.Println(data)
+	//
+
+	data := neonc.ReadFile(file)
+
+	_ = data
 }
