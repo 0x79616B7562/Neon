@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"neon/neonc"
+	"neon/pkg/neonc"
 )
 
 func main() {
 	currentDirectory := neonc.CurrentDirectory()
 
-	all_files := neonc.Walk(currentDirectory)
-	files := neonc.Filter(all_files)
+	all_files := neonc.WalkDirectories(currentDirectory)
+	files := neonc.FilterNonNeonFiles(all_files)
 
 	if len(files) < 1 {
 		fmt.Println("No neon files found.")
@@ -17,11 +17,17 @@ func main() {
 		return
 	}
 
+	//
+
 	file := files[0]
+	data := neonc.ReadFile(file)
 
 	//
 
-	data := neonc.ReadFile(file)
+	lexer := neonc.NewLexer(data)
+	tokens := lexer.Tokenize()
 
-	_ = data
+	for _, token := range tokens {
+		fmt.Printf("TOKENTYPE: %s, POSITION: %q, VALUE: %s\n", neonc.TokenTypeToString(token.TokenType), token.Position.String(), token.Value)
+	}
 }

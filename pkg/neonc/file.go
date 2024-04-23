@@ -2,11 +2,12 @@ package neonc
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 )
 
-func Filter(list []string) []string {
+func FilterNonNeonFiles(list []string) []string {
 	var files_ret []string
 
 	for _, file := range list {
@@ -28,7 +29,7 @@ func CurrentDirectory() string {
 	return path
 }
 
-func Walk(directory string) []string {
+func WalkDirectories(directory string) []string {
 	var ret_files []string
 
 	err := filepath.Walk(directory,
@@ -48,13 +49,12 @@ func Walk(directory string) []string {
 	return ret_files
 }
 
-func ReadFile(filepath string) string {
-	dat, err := os.ReadFile(filepath)
+func ReadFile(filepath string) io.Reader {
+	dat, err := os.Open(filepath)
 
 	if err != nil {
-		fmt.Println("Filepath: ", filepath)
 		panic(err)
 	}
 
-	return string(dat)
+	return dat
 }
