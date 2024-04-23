@@ -1,5 +1,7 @@
 package neonc
 
+import "fmt"
+
 type TokenType int
 
 const (
@@ -29,6 +31,10 @@ type Token struct {
 	Value     string
 }
 
+func (t *Token) String() string {
+	return fmt.Sprintf("%s %q", TokenTypeToString(t.TokenType), t.Value)
+}
+
 type TokenDef struct {
 	TokenType TokenType
 	Match     string
@@ -47,7 +53,7 @@ var TOKENS = []TokenDef{
 }
 
 var REGS = []TokenDef{
-	{IDENT, "^[a-zA-Z_]*[a-zA-Z0-9_]+$"},
+	{IDENT, "^[a-zA-Z_]+[a-zA-Z0-9_]*$"},
 }
 
 func TokenTypeToString(tokenType TokenType) string {

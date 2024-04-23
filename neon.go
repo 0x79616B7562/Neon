@@ -24,10 +24,7 @@ func main() {
 
 	//
 
-	lexer := neonc.NewLexer(data)
-	tokens := lexer.Tokenize()
+	parser := neonc.NewParser()
 
-	for _, token := range tokens {
-		fmt.Printf("TOKENTYPE: %s, POSITION: %q, VALUE: %s\n", neonc.TokenTypeToString(token.TokenType), token.Position.String(), token.Value)
-	}
+	parser.Parse(neonc.NewLexer(data).Tokenize())
 }

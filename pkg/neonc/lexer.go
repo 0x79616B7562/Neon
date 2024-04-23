@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -45,9 +46,72 @@ func (l *Lexer) getToken() TokenType {
 	}
 
 	if compareNonToken {
+		for _, reg := range REGS {
+			reg, err := regexp.Compile(reg.Match)
+
+			if err != nil {
+				panic(err)
+			}
+
+			comp := reg.Find([]byte(l.current))
+
+			if len(comp) == 0 && l.current != "" {
+				comp := string(reg.Find([]byte(l.current[:len(l.current)-1])))
+
+				if len(comp) != 0 {
+					l.addIdent(comp)
+
+					l.current = ""
+					l.reader.UnreadRune()
+
+					break
+				}
+			} else if len(comp) > 0 {
+				returnVal = UNKNOWN
+			}
+		}
 	}
 
 	return returnVal
+}
+
+func (l *Lexer) addIdent(value string) {
+	l.tokens = append(l.tokens, Token{
+		Position: Position{
+			StartLine:   l.position.StartLine,
+			StartColumn: l.position.StartColumn,
+			EndLine:     l.position.EndLine,
+			EndColumn:   l.position.EndColumn,
+		},
+		TokenType: IDENT,
+		Value:     value,
+	})
+}
+
+func (l *Lexer) addEof() {
+	l.tokens = append(l.tokens, Token{
+		Position: Position{
+			StartLine:   l.position.StartLine,
+			StartColumn: l.position.StartColumn,
+			EndLine:     l.position.EndLine,
+			EndColumn:   l.position.EndColumn + 1,
+		},
+		TokenType: EOF,
+		Value:     "",
+	})
+}
+
+func (l *Lexer) addNewLine() {
+	l.tokens = append(l.tokens, Token{
+		Position: Position{
+			StartLine:   l.position.StartLine,
+			StartColumn: l.position.StartColumn,
+			EndLine:     l.position.EndLine,
+			EndColumn:   l.position.EndColumn + 1,
+		},
+		TokenType: NEWLINE,
+		Value:     "",
+	})
 }
 
 func (l *Lexer) Tokenize() []Token {
@@ -56,16 +120,7 @@ func (l *Lexer) Tokenize() []Token {
 
 		if err != nil {
 			if err == io.EOF {
-				l.tokens = append(l.tokens, Token{
-					Position: Position{
-						StartLine:   l.position.StartLine,
-						StartColumn: l.position.StartColumn,
-						EndLine:     l.position.EndLine,
-						EndColumn:   l.position.EndColumn + 1,
-					},
-					TokenType: EOF,
-					Value:     "",
-				})
+				l.addEof()
 
 				break
 			}
@@ -75,16 +130,7 @@ func (l *Lexer) Tokenize() []Token {
 
 		switch char {
 		case '\n':
-			l.tokens = append(l.tokens, Token{
-				Position: Position{
-					StartLine:   l.position.StartLine,
-					StartColumn: l.position.StartColumn,
-					EndLine:     l.position.EndLine,
-					EndColumn:   l.position.EndColumn + 1,
-				},
-				TokenType: NEWLINE,
-				Value:     "",
-			})
+			l.addNewLine()
 
 			l.position.EndLine++
 			l.position.EndColumn = 0
@@ -99,7 +145,7 @@ func (l *Lexer) Tokenize() []Token {
 
 			token := l.getToken()
 
-			if token != UNKNOWN {
+			if token != UNKNOWN && l.current != "" {
 				l.tokens = append(l.tokens, Token{
 					Position: Position{
 						StartLine:   l.position.StartLine,
@@ -107,7 +153,7 @@ func (l *Lexer) Tokenize() []Token {
 						EndLine:     l.position.EndLine,
 						EndColumn:   l.position.EndColumn,
 					},
-					TokenType: l.getToken(),
+					TokenType: token,
 					Value:     l.current,
 				})
 
