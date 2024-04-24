@@ -2,170 +2,100 @@ package neonc
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"regexp"
 	"strings"
-	"unicode"
 )
 
 type Lexer struct {
 	position Position
 	reader   *bufio.Reader
-	current  string
-	tokens   []Token
 }
 
 func NewLexer(reader io.Reader) *Lexer {
 	return &Lexer{
 		position: Position{
-			StartLine:   1,
-			StartColumn: 0,
-			EndLine:     1,
-			EndColumn:   0,
+			Line:   1,
+			Column: 0,
 		},
 		reader: bufio.NewReader(reader),
 	}
 }
 
-func (l *Lexer) getToken() TokenType {
-	returnVal := INVALID
-	compareNonToken := true
-
-	for _, token := range TOKENS {
-		if token.Match == "" {
-			continue
-		}
-
-		if l.current == token.Match {
-			return token.TokenType
-		} else if strings.Contains(token.Match, l.current) {
-			returnVal = UNKNOWN
-			compareNonToken = false
-		}
-	}
-
-	if compareNonToken {
-		for _, reg := range REGS {
-			reg, err := regexp.Compile(reg.Match)
-
-			if err != nil {
-				panic(err)
-			}
-
-			comp := reg.Find([]byte(l.current))
-
-			if len(comp) == 0 && l.current != "" {
-				comp := string(reg.Find([]byte(l.current[:len(l.current)-1])))
-
-				if len(comp) != 0 {
-					l.addIdent(comp)
-
-					l.current = ""
-					l.reader.UnreadRune()
-
-					break
-				}
-			} else if len(comp) > 0 {
-				returnVal = UNKNOWN
-			}
-		}
-	}
-
-	return returnVal
-}
-
-func (l *Lexer) addIdent(value string) {
-	l.tokens = append(l.tokens, Token{
-		Position: Position{
-			StartLine:   l.position.StartLine,
-			StartColumn: l.position.StartColumn,
-			EndLine:     l.position.EndLine,
-			EndColumn:   l.position.EndColumn,
-		},
-		TokenType: IDENT,
-		Value:     value,
-	})
-}
-
-func (l *Lexer) addEof() {
-	l.tokens = append(l.tokens, Token{
-		Position: Position{
-			StartLine:   l.position.StartLine,
-			StartColumn: l.position.StartColumn,
-			EndLine:     l.position.EndLine,
-			EndColumn:   l.position.EndColumn + 1,
-		},
-		TokenType: EOF,
-		Value:     "",
-	})
-}
-
-func (l *Lexer) addNewLine() {
-	l.tokens = append(l.tokens, Token{
-		Position: Position{
-			StartLine:   l.position.StartLine,
-			StartColumn: l.position.StartColumn,
-			EndLine:     l.position.EndLine,
-			EndColumn:   l.position.EndColumn + 1,
-		},
-		TokenType: NEWLINE,
-		Value:     "",
-	})
-}
-
 func (l *Lexer) Tokenize() []Token {
+	var tokens []Token
+	var current string
+
 	for {
 		char, _, err := l.reader.ReadRune()
 
 		if err != nil {
 			if err == io.EOF {
-				l.addEof()
-
 				break
 			}
 
-			fmt.Println(err)
+			panic(err)
 		}
 
-		switch char {
-		case '\n':
-			l.addNewLine()
+		current += string(char)
 
-			l.position.EndLine++
-			l.position.EndColumn = 0
-		default:
-			l.position.EndColumn++
+		l.position.Column++
 
-			if unicode.IsSpace(char) {
+		if char == '\n' {
+			l.position.Line++
+			l.position.Column = 0
+		}
+
+		tokenType := INVALID
+
+		for _, token := range TOKENS {
+			if token.Match == "" || current == "" {
 				continue
 			}
 
-			l.current += string(char)
+			if token.IsRegex {
+				reg, err := regexp.Compile(token.Match)
 
-			token := l.getToken()
+				if err != nil {
+					panic(err)
+				}
 
-			if token != UNKNOWN && l.current != "" {
-				l.tokens = append(l.tokens, Token{
-					Position: Position{
-						StartLine:   l.position.StartLine,
-						StartColumn: l.position.StartColumn,
-						EndLine:     l.position.EndLine,
-						EndColumn:   l.position.EndColumn,
-					},
-					TokenType: token,
-					Value:     l.current,
-				})
+				if len(reg.Find([]byte(current))) == 0 {
+					loccurrent := current[:len(current)-1]
 
-				if token != INVALID {
-					l.current = ""
+					if len(reg.Find([]byte(loccurrent))) > 0 {
+						l.reader.UnreadRune()
 
-					l.position.StartLine = l.position.EndLine
-					l.position.StartColumn = l.position.EndColumn
+						tokenType = token.TokenType
+						current = loccurrent
+
+						break
+					}
+				} else {
+					tokenType = UNKNOWN
+				}
+			} else {
+				if current == token.Match {
+					tokenType = token.TokenType
+					break
+				} else if strings.Contains(token.Match, current) {
+					tokenType = UNKNOWN
 				}
 			}
 		}
+
+		if tokenType != UNKNOWN {
+			if !DoTokenDiscard(tokenType) {
+				tokens = append(tokens, Token{
+					Position:  l.position,
+					TokenType: tokenType,
+					Value:     current,
+				})
+			}
+
+			current = ""
+		}
 	}
 
-	return l.tokens
+	return tokens
 }

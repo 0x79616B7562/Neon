@@ -9,6 +9,8 @@ const (
 	UNKNOWN
 	INVALID
 	NEWLINE
+	WHITESPACE
+	TAB
 
 	FN
 
@@ -32,28 +34,39 @@ type Token struct {
 }
 
 func (t *Token) String() string {
-	return fmt.Sprintf("%s %q", TokenTypeToString(t.TokenType), t.Value)
+	return fmt.Sprintf("%s %q %s", TokenTypeToString(t.TokenType), t.Value, t.Position.String())
 }
 
 type TokenDef struct {
 	TokenType TokenType
 	Match     string
+	IsRegex   bool
+	Discard   bool
 }
 
 var TOKENS = []TokenDef{
-	{NEWLINE, "\n"},
-	{FN, "fn"},
-	{LPAREN, "("},
-	{RPAREN, ")"},
-	{LBRACE, "{"},
-	{RBRACE, "}"},
-	{SEMICOLON, ";"},
-	{DOT, "."},
-	{COMMA, ","},
+	{NEWLINE, "\n", false, false},
+	{FN, "fn", false, false},
+	{LPAREN, "(", false, false},
+	{RPAREN, ")", false, false},
+	{LBRACE, "{", false, false},
+	{RBRACE, "}", false, false},
+	{SEMICOLON, ";", false, false},
+	{DOT, ".", false, false},
+	{COMMA, ",", false, false},
+	{WHITESPACE, " ", false, true},
+	{TAB, "\t", false, true},
+	{IDENT, "^[a-zA-Z_]+[a-zA-Z0-9_]*$", true, false},
 }
 
-var REGS = []TokenDef{
-	{IDENT, "^[a-zA-Z_]+[a-zA-Z0-9_]*$"},
+func DoTokenDiscard(tokenType TokenType) bool {
+	for _, token := range TOKENS {
+		if token.TokenType == tokenType {
+			return token.Discard
+		}
+	}
+
+	return false
 }
 
 func TokenTypeToString(tokenType TokenType) string {
@@ -66,6 +79,8 @@ func TokenTypeToString(tokenType TokenType) string {
 		return "INVALID"
 	case NEWLINE:
 		return "NEWLINE"
+	case WHITESPACE:
+		return "WHITESPACE"
 	case FN:
 		return "FN"
 	case LPAREN:

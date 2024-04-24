@@ -10,6 +10,8 @@ func NewParser() *Parser {
 }
 
 func (p *Parser) Parse(tokens []Token) {
+	fmt.Println("TOKENS:")
+
 	for _, toks := range tokens {
 		fmt.Println(toks.String())
 	}
