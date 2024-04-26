@@ -2,14 +2,20 @@ package neonc
 
 import (
 	"fmt"
-
+	"neon/pkg/enum"
 	"neon/pkg/llvm"
 )
 
 func Compile(ast AST) {
-	fmt.Println("LLVM VERSION:", llvm.Version)
+	target := llvm.NewTarget()
+	defer target.Dispose()
 
-	for _, item := range ast.Items {
-		item.Build()
-	}
+	module := target.CreateModule("test.n")
+	fmt.Printf("\nMODULE:\n\n")
+
+	fn_type := llvm.NewFunctionType(enum.VOID)
+	fn := module.AddFunction("main", fn_type)
+	_ = fn
+
+	module.Dump()
 }
