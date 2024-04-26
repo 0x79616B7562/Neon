@@ -41,11 +41,6 @@ func (l *Lexer) Tokenize() []Token {
 
 		l.position.Column++
 
-		if char == '\n' {
-			l.position.Line++
-			l.position.Column = 0
-		}
-
 		tokenType := INVALID
 
 		for _, token := range TOKENS {
@@ -94,6 +89,11 @@ func (l *Lexer) Tokenize() []Token {
 			}
 
 			current = ""
+		}
+
+		if char == '\n' {
+			l.position.Line++
+			l.position.Column = 0
 		}
 	}
 

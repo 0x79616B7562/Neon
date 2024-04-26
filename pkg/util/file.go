@@ -1,6 +1,7 @@
-package neonc
+package util
 
 import (
+	"bufio"
 	"fmt"
 	"io"
 	"os"
@@ -47,6 +48,27 @@ func WalkDirectories(directory string) []string {
 	}
 
 	return ret_files
+}
+
+func ExtractLine(filepath string, line int) string {
+	if filepath == "" || line < 0 {
+		return ""
+	}
+
+	file := ReadFile(filepath)
+	sc := bufio.NewScanner(file)
+
+	l := 0
+
+	for sc.Scan() {
+		if l == line {
+			return sc.Text()
+		}
+
+		l++
+	}
+
+	return ""
 }
 
 func ReadFile(filepath string) io.Reader {

@@ -3,13 +3,14 @@ package main
 import (
 	"fmt"
 	"neon/pkg/neonc"
+	"neon/pkg/util"
 )
 
 func main() {
-	currentDirectory := neonc.CurrentDirectory()
+	currentDirectory := util.CurrentDirectory()
 
-	all_files := neonc.WalkDirectories(currentDirectory)
-	files := neonc.FilterNonNeonFiles(all_files)
+	all_files := util.WalkDirectories(currentDirectory)
+	files := util.FilterNonNeonFiles(all_files)
 
 	if len(files) < 1 {
 		fmt.Println("No neon files found.")
@@ -20,11 +21,13 @@ func main() {
 	//
 
 	file := files[0]
-	data := neonc.ReadFile(file)
+	data := util.ReadFile(file)
 
 	//
 
-	parser := neonc.NewParser()
+	ast := neonc.NewParser(file, neonc.NewLexer(data).Tokenize()).Parse()
 
-	parser.Parse(neonc.NewLexer(data).Tokenize())
+	ast.Dump()
+
+	neonc.Compile(ast)
 }

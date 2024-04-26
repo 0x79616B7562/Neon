@@ -23,6 +23,7 @@ const (
 	SEMICOLON
 	DOT
 	COMMA
+	COLON
 
 	IDENT
 )
@@ -46,17 +47,25 @@ type TokenDef struct {
 
 var TOKENS = []TokenDef{
 	{NEWLINE, "\n", false, false},
+
 	{FN, "fn", false, false},
+
 	{LPAREN, "(", false, false},
 	{RPAREN, ")", false, false},
+
 	{LBRACE, "{", false, false},
 	{RBRACE, "}", false, false},
+
 	{SEMICOLON, ";", false, false},
 	{DOT, ".", false, false},
 	{COMMA, ",", false, false},
+	{COLON, ":", false, false},
+
 	{WHITESPACE, " ", false, true},
 	{TAB, "\t", false, true},
+
 	{IDENT, "^[a-zA-Z_]+[a-zA-Z0-9_]*$", true, false},
+	// {NUM, "^[0-9_]+[.]?[0-9_]*?$", true, false},
 }
 
 func DoTokenDiscard(tokenType TokenType) bool {
@@ -97,9 +106,11 @@ func TokenTypeToString(tokenType TokenType) string {
 		return "DOT"
 	case COMMA:
 		return "COMMA"
+	case COLON:
+		return "COLON"
 	case IDENT:
 		return "IDENT"
 	default:
-		return "UNKNOWN"
+		return fmt.Sprintf("UNKNOWN TOKEN: %d", tokenType)
 	}
 }
