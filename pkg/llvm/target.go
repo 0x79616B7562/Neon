@@ -7,6 +7,7 @@ import (
 )
 
 /*
+#include <llvm-c/Core.h>
 #include <llvm-c/TargetMachine.h>
 */
 import "C"
@@ -71,4 +72,8 @@ func (t *Target) CreateModule(name string) Module {
 	return Module{
 		Module: module,
 	}
+}
+
+func (t *Target) ModuleToObjectFile(module Module, output string) {
+	emitToFile(t.targetMachine, module.Module, output)
 }

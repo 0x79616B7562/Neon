@@ -84,6 +84,17 @@ func createDataLayout(targetMachine C.LLVMTargetMachineRef) C.LLVMTargetDataRef 
 	return C.LLVMCreateTargetDataLayout(targetMachine)
 }
 
+func emitToFile(targetMachine C.LLVMTargetMachineRef, module C.LLVMModuleRef, output string) {
+	outputptr := stringToCCharPtr(output)
+	defer freeCString(outputptr)
+
+	var errorMsg *C.char
+
+	if C.LLVMTargetMachineEmitToFile(targetMachine, module, outputptr, C.LLVMObjectFile, &errorMsg) != 0 {
+		panic(C.GoString(errorMsg))
+	}
+}
+
 func codeGenLevelNone() C.LLVMCodeGenOptLevel {
 	return C.LLVMCodeGenLevelNone
 }
@@ -200,11 +211,13 @@ func functionType(returnType C.LLVMTypeRef, paramTypes []C.LLVMTypeRef, paramCou
 	}
 }
 
-func appendBlock(function C.LLVMValueRef, name string) {
+func appendBlock(function C.LLVMValueRef, name string) (blockRef C.LLVMBasicBlockRef) {
 	nameptr := stringToCCharPtr(name)
 	defer freeCString(nameptr)
 
-	C.LLVMAppendBasicBlock(function, nameptr)
+	blockRef = C.LLVMAppendBasicBlock(function, nameptr)
+
+	return
 }
 
 func intType(numBits uint32) C.LLVMTypeRef {
