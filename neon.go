@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"neon/pkg/neonc"
+
+	"neon/pkg/lexer"
 	"neon/pkg/util"
 )
 
@@ -25,9 +26,18 @@ func main() {
 
 	//
 
-	ast := neonc.NewParser(file, neonc.NewLexer(data).Tokenize()).Parse("main.n")
+	measure := util.NewMeasure()
+	tokens := lexer.NewLexer(data).Tokenize()
+	measure.Finish("Lexer:")
 
-	ast.Dump()
+	fmt.Println()
 
-	neonc.Compile(ast)
+	for _, token := range tokens {
+		fmt.Println(token.String())
+	}
+
+	// fmt.Println()
+	// ast.Dump()
+
+	// neonc.Compile(ast)
 }

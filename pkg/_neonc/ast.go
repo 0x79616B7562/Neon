@@ -11,8 +11,10 @@ type AST struct {
 }
 
 func (ast *AST) Dump() {
+	fmt.Printf("AST<Name: %q>\n", ast.Name)
+
 	for _, item := range ast.Items {
-		fmt.Println(item.String())
+		fmt.Println(item.String(1))
 	}
 }
 

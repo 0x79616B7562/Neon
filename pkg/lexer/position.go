@@ -1,4 +1,4 @@
-package neonc
+package lexer
 
 import "fmt"
 
