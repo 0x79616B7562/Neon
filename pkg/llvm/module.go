@@ -11,19 +11,19 @@ type Module struct {
 }
 
 func (m *Module) AddFunction(name string, functionType FunctionType) (function Function) {
-	fn := addFunction(m.Module, name, functionType.resolve())
+	nameptr := stringToCCharPtr(name)
+	defer freeCString(nameptr)
+
+	fn := C.LLVMAddFunction(m.Module, nameptr, functionType.resolve())
 
 	function.Function = fn
 	function.Builder = C.LLVMCreateBuilder()
-
-	blockRef := appendBlock(fn, "entry")
-	C.LLVMPositionBuilderAtEnd(function.Builder, blockRef)
 
 	return
 }
 
 func (m *Module) Dump() {
-	dumpModule(m.Module)
+	C.LLVMDumpModule(m.Module)
 }
 
 func (m *Module) Verify() {

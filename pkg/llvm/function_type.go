@@ -2,6 +2,7 @@ package llvm
 
 import (
 	"neon/pkg/enum"
+	"unsafe"
 )
 
 /*
@@ -36,5 +37,17 @@ func (fnt *FunctionType) resolve() C.LLVMTypeRef {
 		paramTypes = append(paramTypes, resolveDataType(param))
 	}
 
-	return functionType(returnType, paramTypes, len(paramTypes), false)
+	isVarArg := false
+	_isVarArg := 0
+
+	if isVarArg {
+		_isVarArg = 1
+	}
+
+	if len(paramTypes) > 0 {
+		return C.LLVMFunctionType(returnType, (*C.LLVMTypeRef)(unsafe.Pointer(&paramTypes[0])), C.uint(len(paramTypes)), C.int(_isVarArg))
+	} else {
+		return C.LLVMFunctionType(returnType, nil, C.uint(len(paramTypes)), C.int(_isVarArg))
+	}
+
 }

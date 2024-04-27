@@ -25,7 +25,7 @@ func main() {
 
 	//
 
-	ast := neonc.NewParser(file, neonc.NewLexer(data).Tokenize()).Parse()
+	ast := neonc.NewParser(file, neonc.NewLexer(data).Tokenize()).Parse("main.n")
 
 	ast.Dump()
 

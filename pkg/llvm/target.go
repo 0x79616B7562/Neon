@@ -22,19 +22,24 @@ type Target struct {
 }
 
 func NewTarget() Target {
-	initializeAll()
+	C.LLVMInitializeAllTargetInfos()
+	C.LLVMInitializeAllTargets()
+	C.LLVMInitializeAllTargetMCs()
+	C.LLVMInitializeAllAsmParsers()
+	C.LLVMInitializeAllAsmPrinters()
 
-	targetTriple := getDefaultTargetTriple()
+	targetTriple := C.LLVMGetDefaultTargetTriple()
 	util.AssertCmpError(!stringCmp(targetTriple, ""), "No Target Triple")
 
-	target := getFirstTarget()
-	result, err := getTargetFromTriple(targetTriple, &target)
-	util.AssertCmpError(!result, fmt.Sprintf("Error Message: %s", err))
+	target := C.LLVMGetFirstTarget()
+	var msg *C.char
+	result := C.LLVMGetTargetFromTriple(targetTriple, &target, &msg)
+	util.AssertCmpError(result == 0, fmt.Sprintf("Error Message: %s", msg))
 
 	cpu := stringToCCharPtr("generic")
 	features := stringToCCharPtr("")
 
-	targetMachine := createTargetMachine(
+	targetMachine := C.LLVMCreateTargetMachine(
 		target,
 		targetTriple,
 		cpu,
@@ -44,7 +49,7 @@ func NewTarget() Target {
 		codeModelDefault(),
 	)
 
-	dataLayout := createDataLayout(targetMachine)
+	dataLayout := C.LLVMCreateTargetDataLayout(targetMachine)
 
 	return Target{
 		targetTriple:  targetTriple,
@@ -63,17 +68,27 @@ func (t *Target) Dispose() {
 	C.LLVMDisposeTargetData(t.dataLayout)
 }
 
-func (t *Target) CreateModule(name string) Module {
-	module := createModule(name)
+func (t *Target) CreateModule(name string) (module Module) {
+	nameptr := stringToCCharPtr(name)
+	defer freeCString(nameptr)
 
-	setModuleTargetTriple(module, t.targetTriple)
-	setModuleDataLayout(module, t.dataLayout)
+	mod := C.LLVMModuleCreateWithName(nameptr)
 
-	return Module{
-		Module: module,
-	}
+	C.LLVMSetTarget(mod, t.targetTriple)
+	C.LLVMSetModuleDataLayout(mod, t.dataLayout)
+
+	module.Module = mod
+
+	return
 }
 
 func (t *Target) ModuleToObjectFile(module Module, output string) {
-	emitToFile(t.targetMachine, module.Module, output)
+	outputptr := stringToCCharPtr(output)
+	defer freeCString(outputptr)
+
+	var errorMsg *C.char
+
+	if C.LLVMTargetMachineEmitToFile(t.targetMachine, module.Module, outputptr, C.LLVMObjectFile, &errorMsg) != 0 {
+		panic(C.GoString(errorMsg))
+	}
 }

@@ -45,7 +45,9 @@ func (p *Parser) analyze(index int) {
 	}
 }
 
-func (p *Parser) Parse() AST {
+func (p *Parser) Parse(name string) AST {
+	p.ast.Name = name
+
 	for {
 		p.analyze(p.index)
 
