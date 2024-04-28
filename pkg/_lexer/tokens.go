@@ -25,7 +25,7 @@ type TokenDef struct {
 var TOKENS = []TokenDef{
 	{enum.WHITESPACE, " ", false, true},
 	{enum.TAB, "\t", false, true},
-	{enum.NEWLINE, "\n", false, false},
+	{enum.NEWLINE, "\n", false, true},
 
 	{enum.VAR, "var", false, false},
 	{enum.FN, "fn", false, false},

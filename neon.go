@@ -1,11 +1,15 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 
-	"neon/pkg/lexer"
+	"neon/pkg/parser"
 	"neon/pkg/util"
 )
+
+//go:embed grammar/grammar
+var grammar string
 
 func main() {
 	currentDirectory := util.CurrentDirectory()
@@ -22,22 +26,35 @@ func main() {
 	//
 
 	file := files[0]
-	data := util.ReadFile(file)
+
+	parser := parser.NewParser(grammar)
+
+	fmt.Println("IDS:")
+	parser.PrintTokenIds()
+	fmt.Println()
+
+	parser.Parse(file)
 
 	//
 
-	measure := util.NewMeasure()
-	tokens := lexer.NewLexer(data).Tokenize()
-	measure.Finish("Lexer:")
-
-	fmt.Println()
-
-	for _, token := range tokens {
-		fmt.Println(token.String())
-	}
-
+	// tokens := lexer.NewLexer(data).Tokenize()
+	//
+	// for _, token := range tokens {
+	// 	fmt.Println(token.String())
+	// }
+	//
 	// fmt.Println()
-	// ast.Dump()
-
-	// neonc.Compile(ast)
+	//
+	// parser := parser.NewParser(file, tokens)
+	// head, err := parser.Parse()
+	//
+	// fmt.Println(head.String(1))
+	//
+	// if err != nil {
+	// 	fmt.Println(err)
+	//
+	// 	return
+	// }
+	//
+	// fmt.Println()
 }

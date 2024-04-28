@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func FilterNonNeonFiles(list []string) []string {
@@ -69,6 +70,18 @@ func ExtractLine(filepath string, line int) string {
 	}
 
 	return ""
+}
+
+func ReaderToString(reader io.Reader) string {
+	var sb strings.Builder
+
+	_, err := io.Copy(&sb, reader)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return sb.String()
 }
 
 func ReadFile(filepath string) io.Reader {

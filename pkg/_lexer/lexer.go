@@ -65,6 +65,13 @@ func (l *Lexer) Tokenize() []Token {
 			continue
 		}
 
+		l.position.Column += len([]rune(str[i]))
+
+		if str[i] == "\n" {
+			l.position.Line++
+			l.position.Column = 0
+		}
+
 		tokenType := enum.INVALID
 
 		for _, token := range TOKENS {
