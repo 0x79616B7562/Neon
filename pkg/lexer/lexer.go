@@ -111,5 +111,11 @@ func (l *Lexer) Tokenize() []Token {
 		}
 	}
 
+	tokens = append(tokens, Token{
+		Position:  l.position,
+		TokenType: enum.EOF,
+		Value:     "EOF",
+	})
+
 	return tokens
 }
