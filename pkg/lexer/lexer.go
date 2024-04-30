@@ -43,6 +43,7 @@ func splitCharsInclusive(s, chars string) (out []string) {
 func (l *Lexer) Tokenize() []Token {
 	var tokens []Token
 
+	//
 	buf := new(strings.Builder)
 	_, err := io.Copy(buf, l.reader)
 
@@ -50,6 +51,7 @@ func (l *Lexer) Tokenize() []Token {
 		panic(err)
 	}
 
+	// splitting array into smaller pieces
 	split := " \n\t"
 
 	for _, token := range TOKENS {
@@ -60,17 +62,30 @@ func (l *Lexer) Tokenize() []Token {
 
 	str := splitCharsInclusive(buf.String(), split)
 
-	for i := 0; i < len(str); i++ {
-		if str[i] == "" {
+	// precompile regexes
+	for i := 0; i < len(TOKENS); i++ {
+		if TOKENS[i].Match == "" {
 			continue
 		}
 
-		l.position.Column += len([]rune(str[i]))
+		if TOKENS[i].IsRegex {
+			reg, err := regexp.Compile(TOKENS[i].Match)
 
-		if str[i] == "\n" {
-			l.position.Line++
-			l.position.Column = 0
+			if err != nil {
+				panic(err)
+			}
+
+			TOKENS[i].CompiledRegex = reg
 		}
+	}
+
+	// find toks
+	for _, s := range str {
+		if s == "" {
+			continue
+		}
+
+		l.position.Column += len([]rune(s))
 
 		tokenType := enum.INVALID
 
@@ -80,19 +95,17 @@ func (l *Lexer) Tokenize() []Token {
 			}
 
 			if !token.IsRegex {
-				if token.Match == str[i] {
+				if token.Match == s {
 					tokenType = token.TokenType
 
 					break
 				}
 			} else {
-				reg, err := regexp.Compile(token.Match)
-
-				if err != nil {
-					panic(err)
+				if token.CompiledRegex == nil {
+					panic("Precompiled Regex is NIL")
 				}
 
-				if len(reg.Find([]byte(str[i]))) > 0 {
+				if len(token.CompiledRegex.Find([]byte(s))) > 0 {
 					tokenType = token.TokenType
 
 					break
@@ -105,12 +118,18 @@ func (l *Lexer) Tokenize() []Token {
 				tokens = append(tokens, Token{
 					Position:  l.position,
 					TokenType: tokenType,
-					Value:     str[i],
+					Value:     s,
 				})
 			}
 		}
+
+		if s == "\n" {
+			l.position.Line++
+			l.position.Column = 0
+		}
 	}
 
+	//
 	tokens = append(tokens, Token{
 		Position:  l.position,
 		TokenType: enum.EOF,

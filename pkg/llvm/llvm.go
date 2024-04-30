@@ -8,6 +8,51 @@ package llvm
 import "C"
 import "unsafe"
 
+const CodeGenLevelNone = C.LLVMCodeGenLevelNone
+const CodeGenLevelLess = C.LLVMCodeGenLevelLess
+const CodeGenLevelDefault = C.LLVMCodeGenLevelDefault
+const CodeGenLevelAggressive = C.LLVMCodeGenLevelAggressive
+
+const RelocDefault = C.LLVMRelocDefault
+const RelocStatic = C.LLVMRelocStatic
+const RelocPIC = C.LLVMRelocPIC
+const RelocDynamicNoPIC = C.LLVMRelocDynamicNoPic
+const RelocROPI = C.LLVMRelocROPI
+const RelocRWPI = C.LLVMRelocRWPI
+const RelocROPI_RWPI = C.LLVMRelocROPI_RWPI
+
+const CodeModelDefault = C.LLVMCodeModelDefault
+const CodeModelTiny = C.LLVMCodeModelTiny
+const CodeModelSmall = C.LLVMCodeModelSmall
+const CodeModelKernel = C.LLVMCodeModelKernel
+const CodeModelMedium = C.LLVMCodeModelMedium
+const CodeModelLarge = C.LLVMCodeModelLarge
+
+const ExternalLinkage = C.LLVMExternalLinkage
+const AvailableExternallyLinkage = C.LLVMAvailableExternallyLinkage
+const LinkOnceAnyLinkage = C.LLVMLinkOnceAnyLinkage
+const LinkOnceODRLinkage = C.LLVMLinkOnceODRLinkage
+const LinkOnceODRAutoHideLinkage = C.LLVMLinkOnceODRAutoHideLinkage
+const WeakAnyLinkage = C.LLVMWeakAnyLinkage
+const WeakODRLinkage = C.LLVMWeakODRLinkage
+const AppendingLinkage = C.LLVMAppendingLinkage
+const InternalLinkage = C.LLVMInternalLinkage
+const PrivateLinkage = C.LLVMPrivateLinkage
+const DLLImportLinkage = C.LLVMDLLImportLinkage
+const DLLExportLinkage = C.LLVMDLLExportLinkage
+const ExternalWeakLinkage = C.LLVMExternalWeakLinkage
+const GhostLinkage = C.LLVMGhostLinkage
+const CommonLinkage = C.LLVMCommonLinkage
+const LinkerPrivateLinkage = C.LLVMLinkerPrivateLinkage
+const LinkerPrivateWeakLinkage = C.LLVMLinkerPrivateWeakLinkage
+
+type LLVMBool C.int
+
+const (
+	True  LLVMBool = 1
+	False LLVMBool = 0
+)
+
 func stringCmp(charptr *C.char, str string) bool {
 	return C.GoString(charptr) == str
 }
@@ -24,82 +69,16 @@ func freeCString(str *C.char) {
 	C.free(unsafe.Pointer(str))
 }
 
-func codeGenLevelNone() C.LLVMCodeGenOptLevel {
-	return C.LLVMCodeGenLevelNone
+// llvm data types
+
+func ConstInt(ctype C.LLVMTypeRef, bits uint64, isSigned LLVMBool) C.LLVMValueRef {
+	return C.LLVMConstInt(ctype, C.ulonglong(bits), C.int(isSigned))
 }
 
-func codeGenLevelLess() C.LLVMCodeGenOptLevel {
-	return C.LLVMCodeGenLevelLess
-}
-
-func codeGenLevelDefault() C.LLVMCodeGenOptLevel {
-	return C.LLVMCodeGenLevelDefault
-}
-
-func codeGenLevelAggressive() C.LLVMCodeGenOptLevel {
-	return C.LLVMCodeGenLevelAggressive
-}
-
-func relocDefault() C.LLVMRelocMode {
-	return C.LLVMRelocDefault
-}
-
-func relocStatic() C.LLVMRelocMode {
-	return C.LLVMRelocStatic
-}
-
-func relocPIC() C.LLVMRelocMode {
-	return C.LLVMRelocPIC
-}
-
-func relocDynamicNoPic() C.LLVMRelocMode {
-	return C.LLVMRelocDynamicNoPic
-}
-
-func relocROPI() C.LLVMRelocMode {
-	return C.LLVMRelocROPI
-}
-
-func relocRWPI() C.LLVMRelocMode {
-	return C.LLVMRelocRWPI
-}
-
-func relocROPI_RWPI() C.LLVMRelocMode {
-	return C.LLVMRelocROPI_RWPI
-}
-
-func codeModelDefault() C.LLVMCodeModel {
-	return C.LLVMCodeModelDefault
-}
-
-func codeModelJITDefault() C.LLVMCodeModel {
-	return C.LLVMCodeModelJITDefault
-}
-
-func codeModelTiny() C.LLVMCodeModel {
-	return C.LLVMCodeModelTiny
-}
-
-func codeModelSmall() C.LLVMCodeModel {
-	return C.LLVMCodeModelSmall
-}
-
-func codeModelKernel() C.LLVMCodeModel {
-	return C.LLVMCodeModelKernel
-}
-
-func codeModelMedium() C.LLVMCodeModel {
-	return C.LLVMCodeModelMedium
-}
-
-func codeModelLarge() C.LLVMCodeModel {
-	return C.LLVMCodeModelLarge
-}
-
-func intType(numBits uint32) C.LLVMTypeRef {
+func IntType(numBits uint32) C.LLVMTypeRef {
 	return C.LLVMIntType(C.uint(numBits))
 }
 
-func voidType() C.LLVMTypeRef {
+func VoidType() C.LLVMTypeRef {
 	return C.LLVMVoidType()
 }

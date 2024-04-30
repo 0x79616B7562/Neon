@@ -3,17 +3,21 @@ package main
 import (
 	"fmt"
 
-	"neon/pkg/clang"
-	"neon/pkg/compiler"
 	"neon/pkg/lexer"
+	"neon/pkg/llvm"
 	"neon/pkg/parser"
+	"neon/pkg/target"
 	"neon/pkg/util"
 )
 
 func main() {
-	fmt.Println("RUNNING")
+	whole := util.NewMeasure()
 
-	clang.Invoke()
+	fmt.Println("RUNNING")
+	fmt.Println()
+
+	fmt.Println("LLVM VERSION:", llvm.Version)
+	fmt.Println()
 
 	currentDirectory := util.CurrentDirectory()
 
@@ -32,7 +36,10 @@ func main() {
 
 	data := util.ReadFile(file)
 
+	measure := util.NewMeasure()
 	tokens := lexer.NewLexer(data).Tokenize()
+	measure.Finish("LEXER:")
+	_ = tokens
 
 	for _, token := range tokens {
 		fmt.Println(token.String())
@@ -40,10 +47,13 @@ func main() {
 
 	fmt.Println()
 
+	measure = util.NewMeasure()
 	parser := parser.NewParser(file, tokens)
-	head, err := parser.Parse()
+	ast, err := parser.Parse()
+	measure.Finish("PARSER:")
 
-	fmt.Println(head.String(1))
+	fmt.Println(ast.String(1))
+	fmt.Println()
 
 	if err != nil {
 		fmt.Println(err)
@@ -51,10 +61,12 @@ func main() {
 		return
 	}
 
+	target := target.NewTarget()
+	defer target.Dispose()
+
+	ast.Build(file, &target)
+
 	fmt.Println()
 
-	compiler := compiler.NewCompiler()
-	defer compiler.Dispose()
-
-	compiler.Compile(head, file)
+	whole.Finish("FINISHED IN:")
 }

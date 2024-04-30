@@ -11,6 +11,7 @@ const (
 
 	BLOCK
 
+	VARIABLE
 	FUNCTION
 )
 
@@ -22,6 +23,8 @@ func ItemToString(item Item) string {
 		return "HEAD"
 	case BLOCK:
 		return "BLOCK"
+	case VARIABLE:
+		return "VARIABLE"
 	case FUNCTION:
 		return "FUNCTION"
 	default:

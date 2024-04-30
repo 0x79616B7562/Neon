@@ -2,3 +2,6 @@ TODO*
 *.ll
 *.o
 *.out
+*.so
+*.c
+*.a

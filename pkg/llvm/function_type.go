@@ -29,12 +29,12 @@ func NewFunctionType(returnType enum.DataType, params ...enum.DataType) Function
 }
 
 func (fnt *FunctionType) resolve() C.LLVMTypeRef {
-	returnType := resolveDataType(fnt.returnType)
+	returnType := ResolveDataType(fnt.returnType)
 
 	var paramTypes []C.LLVMTypeRef
 
 	for _, param := range fnt.params {
-		paramTypes = append(paramTypes, resolveDataType(param))
+		paramTypes = append(paramTypes, ResolveDataType(param))
 	}
 
 	isVarArg := false

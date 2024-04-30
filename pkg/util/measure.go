@@ -10,7 +10,9 @@ type Measure struct {
 }
 
 func NewMeasure() Measure {
-	return Measure{time.Now()}
+	return Measure{
+		time: time.Now(),
+	}
 }
 
 func (m *Measure) Finish(msg string) {

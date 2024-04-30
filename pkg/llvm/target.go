@@ -34,7 +34,7 @@ func NewTarget() Target {
 	target := C.LLVMGetFirstTarget()
 	var msg *C.char
 	result := C.LLVMGetTargetFromTriple(targetTriple, &target, &msg)
-	util.AssertCmpError(result == 0, fmt.Sprintf("Error Message: %s", msg))
+	util.AssertCmpError(result == 0, fmt.Sprintf("Error Message: %s", C.GoString(msg)))
 
 	cpu := stringToCCharPtr("generic")
 	features := stringToCCharPtr("")
@@ -44,9 +44,9 @@ func NewTarget() Target {
 		targetTriple,
 		cpu,
 		features,
-		codeGenLevelNone(),
-		relocPIC(),
-		codeModelDefault(),
+		CodeGenLevelNone,
+		RelocPIC,
+		CodeModelDefault,
 	)
 
 	dataLayout := C.LLVMCreateTargetDataLayout(targetMachine)

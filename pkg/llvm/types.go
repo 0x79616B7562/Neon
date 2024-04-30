@@ -10,12 +10,12 @@ import (
 	"neon/pkg/util"
 )
 
-func resolveDataType(t enum.DataType) C.LLVMTypeRef {
+func ResolveDataType(t enum.DataType) C.LLVMTypeRef {
 	switch t {
 	case enum.VOID:
-		return voidType()
+		return VoidType()
 	case enum.I32:
-		return intType(32)
+		return IntType(32)
 	default:
 		util.PrintType(t)
 		fmt.Println()
