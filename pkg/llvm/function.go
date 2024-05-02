@@ -5,9 +5,7 @@ package llvm
 #include <llvm-c/Analysis.h>
 */
 import "C"
-import (
-	"neon/pkg/enum"
-)
+import "neon/pkg/enum"
 
 type Function struct {
 	Function C.LLVMValueRef

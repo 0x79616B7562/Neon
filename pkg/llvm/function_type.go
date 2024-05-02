@@ -28,6 +28,10 @@ func NewFunctionType(returnType enum.DataType, params ...enum.DataType) Function
 	}
 }
 
+func (fnt *FunctionType) Is(dt enum.DataType) bool {
+	return fnt.returnType == dt
+}
+
 func (fnt *FunctionType) resolve() C.LLVMTypeRef {
 	returnType := ResolveDataType(fnt.returnType)
 
