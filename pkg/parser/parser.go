@@ -12,15 +12,15 @@ func NewParser() Parser {
 	return Parser{}
 }
 
-func (p *Parser) Parse(filePath string) ast.AST {
+func (p *Parser) Parse(filePath string) (ast.AST, error) {
 	data := readDataFromFile(filePath)
 
-	stack := NewStack(nil)
+	stack := NewStack(filePath, nil)
 	lex(data, &stack)
 
-	ast := parseStack(stack)
+	ast, err := parseStack(stack)
 
 	ast.FilePath = filePath
 
-	return ast
+	return ast, err
 }

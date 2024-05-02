@@ -1,14 +1,16 @@
 package parser
 
 type Stack struct {
-	Index  int
-	Tokens []Token
+	FilePath string
+	Index    int
+	Tokens   []Token
 }
 
-func NewStack(tokens []Token) Stack {
+func NewStack(filePath string, tokens []Token) Stack {
 	return Stack{
-		Index:  0,
-		Tokens: tokens,
+		FilePath: filePath,
+		Index:    0,
+		Tokens:   tokens,
 	}
 }
 

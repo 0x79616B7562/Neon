@@ -6,15 +6,22 @@ package llvm
 import "C"
 import (
 	"fmt"
-	"neon/pkg/enum"
 	"neon/pkg/util"
 )
 
-func ResolveDataType(t enum.DataType) C.LLVMTypeRef {
+type DataType uint32
+
+const (
+	VOID DataType = iota
+
+	I32
+)
+
+func ResolveDataType(t DataType) C.LLVMTypeRef {
 	switch t {
-	case enum.VOID:
+	case VOID:
 		return VoidType()
-	case enum.I32:
+	case I32:
 		return IntType(32)
 	default:
 		util.PrintType(t)

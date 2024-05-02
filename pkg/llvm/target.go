@@ -78,6 +78,7 @@ func (t *Target) CreateModule(name string) (module Module) {
 	C.LLVMSetModuleDataLayout(mod, t.dataLayout)
 
 	module.Module = mod
+	module.Builder = C.LLVMCreateBuilder()
 
 	return
 }

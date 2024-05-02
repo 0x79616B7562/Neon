@@ -1,9 +1,6 @@
 package llvm
 
-import (
-	"neon/pkg/enum"
-	"unsafe"
-)
+import "unsafe"
 
 /*
 #include <llvm-c/Core.h>
@@ -11,12 +8,12 @@ import (
 import "C"
 
 type FunctionType struct {
-	returnType enum.DataType
-	params     []enum.DataType
+	returnType DataType
+	params     []DataType
 }
 
-func NewFunctionType(returnType enum.DataType, params ...enum.DataType) FunctionType {
-	var _params []enum.DataType
+func NewFunctionType(returnType DataType, params ...DataType) FunctionType {
+	var _params []DataType
 
 	for _, param := range params {
 		_params = append(_params, param)
@@ -28,7 +25,7 @@ func NewFunctionType(returnType enum.DataType, params ...enum.DataType) Function
 	}
 }
 
-func (fnt *FunctionType) Is(dt enum.DataType) bool {
+func (fnt *FunctionType) Is(dt DataType) bool {
 	return fnt.returnType == dt
 }
 

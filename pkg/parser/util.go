@@ -2,6 +2,7 @@ package parser
 
 import (
 	"io"
+	"neon/pkg/err"
 	"neon/pkg/util"
 	"regexp"
 	"strings"
@@ -41,6 +42,15 @@ func splitCharsInclusive(s, chars string) (out []string) {
 	out = append(out, s)
 
 	return
+}
+
+func makeErr(stack *Stack, message string) error {
+	return err.BuildError(
+		stack.FilePath,
+		stack.Get().Position.Line,
+		stack.Get().Position.Column,
+		message,
+	)
 }
 
 func readDataFromFile(filePath string) []string {

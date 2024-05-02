@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
 	"neon/pkg/ast"
 	"neon/pkg/util"
@@ -67,17 +68,17 @@ func parseRightParen(stack *Stack, ignore util.Option[TokenId]) bool {
 }
 
 // FUNCTION = 'fn' 'ident' '(' ')'
-func parseFunction(stack *Stack, node *ast.Node, data *Data) bool {
+func parseFunction(stack *Stack, node *ast.Node, data *Data) error {
 	if !parseIdent(stack, data, util.Some(NEWLINE)) {
-		return false
+		return makeErr(stack, "expected identifier")
 	}
 
 	if !parseLeftParen(stack, util.Some(NEWLINE)) {
-		return false
+		return makeErr(stack, "expected '('")
 	}
 
 	if !parseRightParen(stack, util.Some(NEWLINE)) {
-		return false
+		return makeErr(stack, "expected ')'")
 	}
 
 	node.Nodes = append(node.Nodes, ast.Node{
@@ -85,17 +86,18 @@ func parseFunction(stack *Stack, node *ast.Node, data *Data) bool {
 		Data: data.Data,
 	})
 
-	return true
+	return nil
 }
 
 //
 
-func analyze(stack *Stack, node *ast.Node) {
+func analyze(stack *Stack, node *ast.Node) error {
 loop:
 	for {
 		if stack.IsAtEnd() {
 			break
 		}
+
 		found := false
 
 		tokenId := stack.Get().TokenId
@@ -111,11 +113,19 @@ loop:
 						ast.FUNCTION,
 					},
 				) {
-					analyze(stack, &node.Nodes[len(node.Nodes)-1])
+					err := analyze(stack, &node.Nodes[len(node.Nodes)-1])
+
+					if err != nil {
+						break loop
+					}
 				} else {
 					lnode := ast.Node{Id: ast.BLOCK}
 
-					analyze(stack, &lnode)
+					err := analyze(stack, &lnode)
+
+					if err != nil {
+						break loop
+					}
 
 					node.Nodes = append(node.Nodes, lnode)
 				}
@@ -133,8 +143,10 @@ loop:
 				stack.AddToIndex(1)
 				result := ff.Follow(stack, node, &Data{})
 
-				if !result {
-					fmt.Println(util.ColorYellow + "TODO" + util.ColorReset + ": Error grammar.go")
+				if result != nil {
+					fmt.Println(result)
+
+					return errors.New(util.MakeRed("Syntax Error"))
 				}
 
 				found = true
@@ -142,17 +154,23 @@ loop:
 		}
 
 		if !found {
-			fmt.Println(util.ColorRed + "Internal Error" + util.ColorReset + ": Unknown FF TokenId: " + stack.Get().String())
+			fmt.Println(util.MakeRed("Internal Error") + ": Unknown FF TokenId: " + stack.Get().String())
 
 			break
 		}
 	}
+
+	return nil
 }
 
-func parseStack(stack Stack) ast.AST {
+func parseStack(stack Stack) (ast.AST, error) {
 	ast := ast.NewAST()
 
-	analyze(&stack, &ast.Head)
+	err := analyze(&stack, &ast.Head)
 
-	return ast
+	if err != nil {
+		return ast, err
+	}
+
+	return ast, nil
 }

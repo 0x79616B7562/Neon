@@ -5,7 +5,6 @@ package llvm
 #include <llvm-c/Analysis.h>
 */
 import "C"
-import "neon/pkg/enum"
 
 type Function struct {
 	Function C.LLVMValueRef
@@ -47,8 +46,8 @@ func (f *Function) BuildStore(value C.LLVMValueRef, ptr C.LLVMValueRef) (valuere
 	return
 }
 
-func (f *Function) AddRet(returnType enum.DataType, valueref C.LLVMValueRef) {
-	if returnType == enum.VOID {
+func (f *Function) AddRet(returnType DataType, valueref C.LLVMValueRef) {
+	if returnType == VOID {
 		C.LLVMBuildRetVoid(f.Builder)
 	} else {
 		C.LLVMBuildRet(f.Builder, valueref)
@@ -57,8 +56,4 @@ func (f *Function) AddRet(returnType enum.DataType, valueref C.LLVMValueRef) {
 
 func (f *Function) Verify() {
 	C.LLVMVerifyFunction(f.Function, C.LLVMAbortProcessAction)
-}
-
-func (f *Function) Dispose() {
-	C.LLVMDisposeBuilder(f.Builder)
 }

@@ -2,7 +2,6 @@ package compiler
 
 import (
 	"neon/pkg/ast"
-	"neon/pkg/enum"
 	"neon/pkg/llvm"
 )
 
@@ -13,10 +12,10 @@ func compileFunction(pack *Pack, node *ast.Node) Hook {
 		panic(err)
 	}
 
-	rettype := llvm.NewFunctionType(enum.VOID)
+	rettype := llvm.NewFunctionType(llvm.VOID)
 
 	if ident.Value == "main" {
-		rettype = llvm.NewFunctionType(enum.I32)
+		rettype = llvm.NewFunctionType(llvm.I32)
 	}
 
 	function := pack.Module.AddFunction(ident.Value, rettype)
@@ -25,9 +24,9 @@ func compileFunction(pack *Pack, node *ast.Node) Hook {
 
 	return func(pack *Pack, node *ast.Node) {
 		if ident.Value == "main" {
-			function.AddRet(enum.I32, llvm.ConstInt(llvm.IntType(32), 0, llvm.False))
-		} else if rettype.Is(enum.VOID) {
-			function.AddRet(enum.VOID, nil)
+			function.AddRet(llvm.I32, llvm.ConstInt(llvm.IntType(32), 0, llvm.False))
+		} else if rettype.Is(llvm.VOID) {
+			function.AddRet(llvm.VOID, nil)
 		}
 	}
 }

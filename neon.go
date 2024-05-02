@@ -17,7 +17,8 @@ func main() {
 
 	measure := util.NewMeasure()
 	currentDirectory := util.CurrentDirectory()
-	fmt.Println("WORKING DIR: " + currentDirectory)
+
+	fmt.Println("WORKING DIR:", currentDirectory)
 
 	all_files := util.WalkDirectories(currentDirectory)
 	files := util.FilterNonNeonFiles(all_files)
@@ -35,22 +36,35 @@ func main() {
 
 	measure = util.NewMeasure()
 	parser := parser.NewParser()
-	ast := parser.Parse(file)
+	ast, err := parser.Parse(file)
+
+	if err != nil {
+		fmt.Println(err)
+
+		return
+	}
+
 	measure.Finish("PARSER:")
 
 	fmt.Println()
 	ast.Dump()
 	fmt.Println()
 
-	err := semantic.Analyze(ast)
+	measure = util.NewMeasure()
+	err = semantic.Analyze(ast)
 
 	if err != nil {
+		fmt.Println(err)
 		return
 	}
 
+	measure.Finish("Semantic Analysis:")
+
+	measure = util.NewMeasure()
 	compiler := compiler.NewCompiler()
 	defer compiler.Dispose()
 	compiler.Compile(ast)
+	measure.Finish("Compiling:")
 
 	fmt.Println()
 

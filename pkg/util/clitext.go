@@ -9,3 +9,16 @@ var ColorMagenta = "\033[35m"
 var ColorCyan = "\033[36m"
 var ColorGray = "\033[37m"
 var ColorWhite = "\033[97m"
+var Bold = "\033[1m"
+
+func MakeRed(str string) string {
+	return ColorRed + str + ColorReset
+}
+
+func MakeCyan(str string) string {
+	return ColorCyan + str + ColorReset
+}
+
+func MakeBold(str string) string {
+	return Bold + str + ColorReset
+}
