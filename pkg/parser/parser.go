@@ -13,9 +13,10 @@ func NewParser() Parser {
 }
 
 func (p *Parser) Parse(filePath string) (ast.AST, error) {
-	data := readDataFromFile(filePath)
+	data := readFile(filePath)
 
 	stack := NewStack(filePath, nil)
+
 	lex(data, &stack)
 
 	ast, err := parseStack(stack)

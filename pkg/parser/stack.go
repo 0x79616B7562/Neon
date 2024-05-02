@@ -1,5 +1,7 @@
 package parser
 
+import "fmt"
+
 type Stack struct {
 	FilePath string
 	Index    int
@@ -11,6 +13,12 @@ func NewStack(filePath string, tokens []Token) Stack {
 		FilePath: filePath,
 		Index:    0,
 		Tokens:   tokens,
+	}
+}
+
+func (s *Stack) Dump() {
+	for _, tok := range s.Tokens {
+		fmt.Println(tok.String())
 	}
 }
 

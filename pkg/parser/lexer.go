@@ -1,34 +1,7 @@
 package parser
 
-import "errors"
-
-func lex(data []string, stack *Stack) {
-	position := Position{
-		Line:   1,
-		Column: 0,
-	}
-
-	for _, str := range data {
-		tok, err := tok(str, &position)
-
-		if err != nil {
-			continue
-		}
-
-		stack.Push(tok)
-	}
-}
-
-func tok(s string, position *Position) (Token, error) {
-	if s == "" {
-		return Token{}, errors.New("INPUT IS EMPTY")
-	}
-
-	var token Token
-
-	position.Column += len([]rune(s))
-
-	tokenId := INVALID
+func findTok(current string) TokenId {
+	id := INVALID
 
 	for _, token := range TOKENS {
 		if token.Match == "" {
@@ -36,8 +9,8 @@ func tok(s string, position *Position) (Token, error) {
 		}
 
 		if !token.IsRegex {
-			if token.Match == s {
-				tokenId = token.TokenId
+			if token.Match == current {
+				id = token.TokenId
 
 				break
 			}
@@ -46,30 +19,61 @@ func tok(s string, position *Position) (Token, error) {
 				panic("Precompiled Regex is NIL")
 			}
 
-			if len(token.CompiledRegex.Find([]byte(s))) > 0 {
-				tokenId = token.TokenId
+			if len(token.CompiledRegex.Find([]byte(current))) > 0 {
+				id = token.TokenId
 
 				break
 			}
 		}
 	}
 
-	if tokenId != UNKNOWN {
-		if !DoTokenDiscard(tokenId) {
-			token = Token{
-				Position: *position,
-				TokenId:  tokenId,
-				Value:    s,
+	return id
+}
+
+func lex(data string, stack *Stack) {
+	position := Position{
+		Line:   1,
+		Column: 0,
+	}
+
+	current := ""
+	found := false
+
+	for i := 0; i < len(data); i++ {
+		current += string(data[i])
+
+		position.Column++
+
+		tokenId := findTok(current)
+
+		if tokenId != INVALID {
+			found = true
+		} else if tokenId == INVALID && found {
+			found = false
+
+			ncur := current[:len(current)-1]
+
+			current = ""
+
+			i--
+			position.Column--
+
+			tokenId = findTok(ncur)
+
+			if tokenId != UNKNOWN {
+				if !DoTokenDiscard(tokenId) {
+					stack.Push(Token{
+						Position: position,
+						TokenId:  tokenId,
+						Value:    ncur,
+					})
+				}
 			}
-		} else {
-			return Token{}, errors.New("TOKEN IS UNKNOWN")
+		}
+
+		if data[i] == '\n' {
+			position.Line++
+			position.Column = 0
 		}
 	}
-
-	if s == "\n" {
-		position.Line++
-		position.Column = 0
-	}
-
-	return token, nil
 }

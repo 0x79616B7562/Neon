@@ -33,6 +33,7 @@ const (
 
 	IDENT
 	NUM
+	STRING
 )
 
 func TokenIdToString(tokenId TokenId) string {
@@ -82,6 +83,8 @@ func TokenIdToString(tokenId TokenId) string {
 		return "IDENT"
 	case NUM:
 		return "NUM"
+	case STRING:
+		return "STRING"
 
 	default:
 		return fmt.Sprintf("UNKNOWN TOKEN STRING: %d", tokenId)
@@ -129,6 +132,7 @@ var TOKENS = []TokenDef{
 
 	{IDENT, "^[a-zA-Z_]+[a-zA-Z0-9_]*$", true, false, nil},
 	{NUM, "^[-]?[0-9_]+[.]?[0-9_]*?$", true, false, nil},
+	{STRING, "^\"(?:\\\\.|[^\"\\\\])*\"$", true, false, nil},
 }
 
 func DoTokenDiscard(tokenId TokenId) bool {

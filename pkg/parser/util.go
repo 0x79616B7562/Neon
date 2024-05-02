@@ -27,23 +27,6 @@ func precompileRegexes() {
 
 }
 
-func splitCharsInclusive(s, chars string) (out []string) {
-	for {
-		m := strings.IndexAny(s, chars)
-
-		if m < 0 {
-			break
-		}
-
-		out = append(out, s[:m], s[m:m+1])
-		s = s[m+1:]
-	}
-
-	out = append(out, s)
-
-	return
-}
-
 func makeErr(stack *Stack, message string) error {
 	return err.BuildError(
 		stack.FilePath,
@@ -53,7 +36,7 @@ func makeErr(stack *Stack, message string) error {
 	)
 }
 
-func readDataFromFile(filePath string) []string {
+func readFile(filePath string) string {
 	reader := util.ReadFile(filePath)
 
 	buf := new(strings.Builder)
@@ -63,15 +46,5 @@ func readDataFromFile(filePath string) []string {
 		panic(err)
 	}
 
-	split := " \n\t"
-
-	for _, token := range TOKENS {
-		if token.Match != "" && !token.IsRegex && len([]rune(token.Match)) == 1 {
-			split += token.Match
-		}
-	}
-
-	str := splitCharsInclusive(buf.String(), split)
-
-	return str
+	return buf.String()
 }
