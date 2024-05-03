@@ -1,9 +1,9 @@
 package compiler
 
 import (
-	"neon/pkg/ast"
+	"fmt"
 	"neon/pkg/llvm"
-	"path/filepath"
+	"neon/pkg/nir"
 )
 
 type Compiler struct {
@@ -16,18 +16,14 @@ func NewCompiler() Compiler {
 	}
 }
 
-func (c *Compiler) Dispose() {
-	c.target.Dispose()
+func (c *Compiler) Compile(nir nir.Module) {
+	module := c.target.CreateModule(nir.Name)
+	defer module.Dispose()
+
+	fmt.Println("LLVMIR:")
+	module.Dump()
 }
 
-func (c *Compiler) Compile(ast ast.AST) {
-	_, file := filepath.Split(ast.FilePath)
-
-	pack := Pack{Module: c.target.CreateModule(file)}
-	defer pack.Module.Dispose()
-
-	walk(&pack, ast.Head)
-
-	pack.Module.Dump()
-	pack.Module.Verify()
+func (c *Compiler) Dispose() {
+	c.target.Dispose()
 }

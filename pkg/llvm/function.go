@@ -28,7 +28,7 @@ func (f *Function) SetBuilderToBlockEnd(blockRef C.LLVMBasicBlockRef) {
 	C.LLVMPositionBuilderAtEnd(f.Builder, blockRef)
 }
 
-func (f *Function) SetBr(blockRef C.LLVMBasicBlockRef) {
+func (f *Function) BuildBr(blockRef C.LLVMBasicBlockRef) {
 	C.LLVMBuildBr(f.Builder, blockRef)
 }
 
@@ -46,7 +46,7 @@ func (f *Function) BuildStore(value C.LLVMValueRef, ptr C.LLVMValueRef) (valuere
 	return
 }
 
-func (f *Function) AddRet(returnType DataType, valueref C.LLVMValueRef) {
+func (f *Function) BuildRet(returnType DataType, valueref C.LLVMValueRef) {
 	if returnType == VOID {
 		C.LLVMBuildRetVoid(f.Builder)
 	} else {
@@ -56,4 +56,8 @@ func (f *Function) AddRet(returnType DataType, valueref C.LLVMValueRef) {
 
 func (f *Function) Verify() {
 	C.LLVMVerifyFunction(f.Function, C.LLVMAbortProcessAction)
+}
+
+func (f *Function) Dispose() {
+	C.LLVMDisposeBuilder(f.Builder)
 }

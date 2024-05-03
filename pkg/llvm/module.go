@@ -7,8 +7,7 @@ package llvm
 import "C"
 
 type Module struct {
-	Module  C.LLVMModuleRef
-	Builder C.LLVMBuilderRef
+	Module C.LLVMModuleRef
 }
 
 func (m *Module) AddFunction(name string, functionType FunctionType) (function Function) {
@@ -18,7 +17,7 @@ func (m *Module) AddFunction(name string, functionType FunctionType) (function F
 	fn := C.LLVMAddFunction(m.Module, nameptr, functionType.resolve())
 
 	function.Function = fn
-	function.Builder = m.Builder
+	function.Builder = C.LLVMCreateBuilder()
 
 	return
 }
@@ -33,6 +32,5 @@ func (m *Module) Verify() {
 }
 
 func (m *Module) Dispose() {
-	C.LLVMDisposeBuilder(m.Builder)
 	C.LLVMDisposeModule(m.Module)
 }

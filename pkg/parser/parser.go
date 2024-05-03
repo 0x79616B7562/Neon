@@ -13,11 +13,13 @@ func NewParser() Parser {
 }
 
 func (p *Parser) Parse(filePath string) (ast.AST, error) {
-	data := readFile(filePath)
+	data := readFile(filePath) + "\n"
 
 	stack := NewStack(filePath, nil)
 
 	lex(data, &stack)
+
+	stack.Dump()
 
 	ast, err := parseStack(stack)
 

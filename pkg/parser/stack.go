@@ -3,9 +3,10 @@ package parser
 import "fmt"
 
 type Stack struct {
-	FilePath string
-	Index    int
-	Tokens   []Token
+	FilePath      string
+	Index         int
+	Tokens        []Token
+	LastLeftBrace Token
 }
 
 func NewStack(filePath string, tokens []Token) Stack {
@@ -20,6 +21,15 @@ func (s *Stack) Dump() {
 	for _, tok := range s.Tokens {
 		fmt.Println(tok.String())
 	}
+}
+
+func (s *Stack) Pop() {
+	if len(s.Tokens) == 0 {
+		return
+	}
+
+	s.Index--
+	s.Tokens = s.Tokens[:len(s.Tokens)-1]
 }
 
 func (s *Stack) Push(tok Token) {

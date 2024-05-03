@@ -1,6 +1,9 @@
 package ast
 
-import "fmt"
+import (
+	"fmt"
+	"neon/pkg/util"
+)
 
 type Data struct {
 	Id    Id
@@ -8,5 +11,9 @@ type Data struct {
 }
 
 func (d *Data) String() string {
-	return fmt.Sprintf("%s(%s)", d.Id, d.Value)
+	if d.Value == "" {
+		return fmt.Sprintf(util.ColorBlue+"%s"+util.ColorReset, d.Id)
+	}
+
+	return fmt.Sprintf(util.ColorYellow+"%s"+util.ColorReset+"("+util.ColorGreen+"%s"+util.ColorReset+")", d.Id, d.Value)
 }

@@ -4,10 +4,8 @@ package llvm
 #include <llvm-c/Core.h>
 */
 import "C"
-import (
+import
 	"fmt"
-	"neon/pkg/util"
-)
 
 type DataType uint32
 
@@ -24,7 +22,7 @@ func ResolveDataType(t DataType) C.LLVMTypeRef {
 	case I32:
 		return IntType(32)
 	default:
-		util.PrintType(t)
+		fmt.Printf("%T", t)
 		fmt.Println()
 		panic("Failed to resolve data type")
 	}

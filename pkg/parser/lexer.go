@@ -53,10 +53,11 @@ func lex(data string, stack *Stack) {
 
 			ncur := current[:len(current)-1]
 
+			position.Column--
+
 			current = ""
 
 			i--
-			position.Column--
 
 			tokenId = findTok(ncur)
 
@@ -69,11 +70,17 @@ func lex(data string, stack *Stack) {
 					})
 				}
 			}
-		}
 
-		if data[i] == '\n' {
-			position.Line++
-			position.Column = 0
+			if tokenId == NEWLINE {
+				position.Line++
+				position.Column = 0
+			}
 		}
 	}
+
+	stack.Push(Token{
+		Position: position,
+		TokenId:  EOF,
+		Value:    "EOF",
+	})
 }

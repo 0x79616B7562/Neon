@@ -2,17 +2,17 @@ package ast
 
 type AST struct {
 	FilePath string
-	Head     Node
+	Root     Node
 }
 
 func NewAST() AST {
 	return AST{
-		Head: Node{
-			Id: HEAD,
+		Root: Node{
+			Id: ROOT,
 		},
 	}
 }
 
 func (a *AST) Dump() {
-	a.Head.Dump(0)
+	a.Root.Dump(0)
 }

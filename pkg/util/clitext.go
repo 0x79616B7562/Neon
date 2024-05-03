@@ -22,3 +22,11 @@ func MakeCyan(str string) string {
 func MakeBold(str string) string {
 	return Bold + str + ColorReset
 }
+
+func MakeYellow(str string) string {
+	return ColorYellow + str + ColorReset
+}
+
+func MakeGreen(str string) string {
+	return ColorGreen + str + ColorReset
+}

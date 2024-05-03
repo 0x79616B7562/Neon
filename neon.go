@@ -4,8 +4,9 @@ import (
 	"fmt"
 
 	"neon/pkg/compiler"
+	"neon/pkg/llvm"
+	"neon/pkg/nir"
 	"neon/pkg/parser"
-	"neon/pkg/semantic"
 	"neon/pkg/util"
 )
 
@@ -13,6 +14,7 @@ func main() {
 	whole := util.NewMeasure()
 
 	fmt.Println("RUNNING")
+	fmt.Println("LLVM VERSION:", llvm.Version)
 	fmt.Println()
 
 	measure := util.NewMeasure()
@@ -51,20 +53,20 @@ func main() {
 	fmt.Println()
 
 	measure = util.NewMeasure()
-	err = semantic.Analyze(ast)
+	nir := nir.NewNeonIR(file)
+	mod := nir.Generate(ast)
 
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	measure.Finish("Semantic Analysis:")
+	fmt.Println()
+	fmt.Println("NIR:")
+	nir.Dump()
+	measure.Finish("NeonIR:")
+	fmt.Println()
 
 	measure = util.NewMeasure()
 	compiler := compiler.NewCompiler()
 	defer compiler.Dispose()
-	compiler.Compile(ast)
-	measure.Finish("Compiling:")
+	compiler.Compile(mod)
+	measure.Finish("COMPILER:")
 
 	fmt.Println()
 

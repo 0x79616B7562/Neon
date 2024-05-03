@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"neon/pkg/util"
 	"regexp"
 )
 
@@ -15,9 +16,9 @@ const (
 	TAB
 	NEWLINE
 
+	FN
 	VAR
 	MUT
-	FN
 
 	LPAREN
 	RPAREN
@@ -34,10 +35,12 @@ const (
 	IDENT
 	NUM
 	STRING
+
+	SINGLELINECOMMENT
 )
 
-func TokenIdToString(tokenId TokenId) string {
-	switch tokenId {
+func (id TokenId) String() string {
+	switch id {
 	case INVALID:
 		return "INVALID"
 	case EOF:
@@ -51,12 +54,12 @@ func TokenIdToString(tokenId TokenId) string {
 	case NEWLINE:
 		return "NEWLINE"
 
+	case FN:
+		return "FN"
 	case VAR:
 		return "VAR"
 	case MUT:
 		return "MUT"
-	case FN:
-		return "FN"
 
 	case LPAREN:
 		return "LPAREN"
@@ -86,8 +89,11 @@ func TokenIdToString(tokenId TokenId) string {
 	case STRING:
 		return "STRING"
 
+	case SINGLELINECOMMENT:
+		return "SINGLE LINE COMMENT"
+
 	default:
-		return fmt.Sprintf("UNKNOWN TOKEN STRING: %d", tokenId)
+		return fmt.Sprintf("UNKNOWN TOKEN STRING: %d", id)
 	}
 }
 
@@ -98,7 +104,7 @@ type Token struct {
 }
 
 func (t Token) String() string {
-	return fmt.Sprintf("%s %q %s", TokenIdToString(t.TokenId), t.Value, t.Position.String())
+	return fmt.Sprintf(util.ColorCyan+"%s"+util.ColorYellow+" %q"+util.ColorReset+" %s", t.TokenId.String(), t.Value, t.Position.String())
 }
 
 type TokenDef struct {
@@ -114,9 +120,9 @@ var TOKENS = []TokenDef{
 	{TAB, "\t", false, true, nil},
 	{NEWLINE, "\n", false, false, nil},
 
+	{FN, "fn", false, false, nil},
 	{VAR, "var", false, false, nil},
 	{MUT, "mut", false, false, nil},
-	{FN, "fn", false, false, nil},
 
 	{LPAREN, "(", false, false, nil},
 	{RPAREN, ")", false, false, nil},
@@ -133,6 +139,8 @@ var TOKENS = []TokenDef{
 	{IDENT, "^[a-zA-Z_]+[a-zA-Z0-9_]*$", true, false, nil},
 	{NUM, "^[-]?[0-9_]+[.]?[0-9_]*?$", true, false, nil},
 	{STRING, "^\"(?:\\\\.|[^\"\\\\])*\"$", true, false, nil},
+
+	{SINGLELINECOMMENT, "^\\/\\/[^\\n\\r]+$", true, false, nil},
 }
 
 func DoTokenDiscard(tokenId TokenId) bool {
