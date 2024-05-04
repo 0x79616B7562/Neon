@@ -1,4 +1,6 @@
 TODO*
+/build
+Makefile
 *.ll
 *.o
 *.out
