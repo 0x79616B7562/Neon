@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.28.2)
 
-project(NEON VERSION 0.1.0 LANGUAGES CXX)
+project(neon VERSION 0.1.0 LANGUAGES CXX)
 
 set (CMAKE_CXX_STANDARD 17)
+
+add_definitions(-w)
 
 file(
     GLOB
@@ -11,4 +13,4 @@ file(
     ${PROJECT_SOURCE_DIR}/src/*/*.cpp
 )
 
-add_executable(NEON ${SRC_FILES})
+add_executable(neon ${SRC_FILES})
