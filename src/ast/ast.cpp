@@ -1,5 +1,9 @@
 #include "ast.h"
 
-Node * AST::get_root() {
+Node * Ast::get_root_ptr() {
     return &root;
+}
+
+void Ast::dump() const {
+    root.dump(0);
 }

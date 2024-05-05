@@ -1,7 +1,8 @@
 #include "lexer.h"
+#include <cstddef>
 
 Lexer::Lexer() {
-    for (int i = 0; i < std::size(TOKENS); i++) {
+    for (std::size_t i = 0; i < std::size(TOKENS); i++) {
         auto tok = TokenDef {
             TOKENS[i].token,
             TOKENS[i].match,
@@ -18,6 +19,8 @@ Lexer::Lexer() {
 }
 
 inline const std::optional<const TokenDef> Lexer::match(const std::string & input) const {
+    bool c = false;
+
     for (auto tok : tokens) {
         if (tok.is_regex) {
             if (std::regex_match(input, tok.regex)) {
@@ -26,9 +29,14 @@ inline const std::optional<const TokenDef> Lexer::match(const std::string & inpu
         } else {
             if (input == tok.match) {
                 return tok;
+            } else if (input.find(tok.match) != std::string::npos) {
+                c = true;
             }
         }
     }
+
+    if (!c)
+        return TokenDef { .token = INVALID, .do_discard = false, };
 
     return {};
 }
@@ -45,12 +53,14 @@ inline bool Lexer::do_discard_token(const TokenId id) const {
 
 const std::vector<Token> Lexer::Tokenize(std::string input) const {
     std::string buf;
+    
     std::vector<Token> tokens;
+
     bool found = false;
     uint32_t line = 1;
     uint32_t column = 0;
 
-    for (int i = 0; i < input.length(); i++) {
+    for (std::size_t i = 0; i < input.length(); i++) {
         buf += input[i];
 
         column++;
@@ -62,7 +72,7 @@ const std::vector<Token> Lexer::Tokenize(std::string input) const {
         else if (!tok.has_value() && found) {
             found = false;
 
-            auto tmp = buf.substr(0, buf.size()-1);
+            auto tmp = buf.substr(0, buf.size() - 1);
 
             i--;
             column--;

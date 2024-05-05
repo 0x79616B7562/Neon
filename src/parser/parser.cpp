@@ -35,9 +35,11 @@ void Parser::walk(Pack * pack, Node * node) const {
     }
 }
 
-void Parser::parse(std::vector<Token> tokens) const {
+const Ast Parser::parse(std::vector<Token> tokens) const {
     auto pack = Pack(tokens);
-    auto ast = AST();
+    auto ast = Ast(Node(Data(AstId::ROOT)));
 
-    walk(&pack, ast.get_root());
+    walk(&pack, ast.get_root_ptr());
+
+    return ast;
 }

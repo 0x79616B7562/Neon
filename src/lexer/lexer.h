@@ -4,8 +4,6 @@
 #include <optional>
 
 class Lexer {
-private:
-    TokenDef tokens[sizeof(TOKENS)/sizeof(*TOKENS)];
 public:
     Lexer();
 
@@ -13,4 +11,6 @@ public:
 private:
     inline const std::optional<const TokenDef> match(const std::string & input) const;
     inline bool do_discard_token(const TokenId id) const;
+private:
+    TokenDef tokens[sizeof(TOKENS)/sizeof(*TOKENS)];
 };

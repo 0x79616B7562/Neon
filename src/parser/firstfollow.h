@@ -11,5 +11,5 @@ struct FirstFollow {
 };
 
 const FirstFollow FIRST_FOLLOW[] = {
-    {first: TokenId::FN, follow: parse_function},
+    {.first = TokenId::FN, .follow = parse_function},
 }; 

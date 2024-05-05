@@ -1,20 +1,20 @@
 #include "grammar.h"
 
-std::optional<Token> parse_token(Pack * pack, TokenId to_find, std::optional<TokenId> ignore) {
-    for (int i = pack->index; i < std::size(pack->tokens); i++) {
+#define CHECK_RET_FALSE(val) if (!val) return false
+
+const std::optional<Token> parse_token(Pack * pack, const TokenId to_find, const std::optional<TokenId> ignore) {
+    for (std::size_t i = pack->index; i < std::size(pack->tokens); i++) {
         Token tok = pack->tokens[i];
-   
+
         if (tok.token == to_find) {
             pack->index += i - pack->index + 1;
-
+            
             return tok;
         }
 
-        if (ignore.has_value()) {
-            if (ignore.value() == tok.token) {
+        if (ignore.has_value())
+            if (ignore.value() == tok.token)
                 continue;
-            }
-        }
 
         return {};
     }
@@ -22,19 +22,31 @@ std::optional<Token> parse_token(Pack * pack, TokenId to_find, std::optional<Tok
     return {};
 }
 
-// 'fn' 'ident' '(' ')' '{' '}'
+// BODY = FUNCTION
+bool parse_body(Pack * pack, Node * node) {
+    return parse_function(pack, node);
+}
+
+// FUNCTION = 'fn' 'ident' '(' ')' '{' BODY*? '}'
 bool parse_function(Pack * pack, Node * node) {
-    if (!parse_token(pack, TokenId::FN, TokenId::NEWLINE))
-        return false;
+    auto fntok = parse_token(pack, TokenId::FN, TokenId::NEWLINE);
+    CHECK_RET_FALSE(fntok);
 
     auto ident = parse_token(pack, TokenId::IDENT, TokenId::NEWLINE);
-    if (!ident) return false;
-    
-    if (!parse_token(pack, TokenId::LPAREN, TokenId::NEWLINE)) return false;
-    if (!parse_token(pack, TokenId::RPAREN, TokenId::NEWLINE)) return false;
-    
-    if (!parse_token(pack, TokenId::LBRACE, TokenId::NEWLINE)) return false;
-    if (!parse_token(pack, TokenId::RBRACE, TokenId::NEWLINE)) return false;
+    CHECK_RET_FALSE(ident);
+
+    auto fnnode = Node(Data(AstId::FUNCTION, ident->value, {{fntok->line, fntok->column}}));
+
+    CHECK_RET_FALSE(parse_token(pack, TokenId::LPAREN, TokenId::NEWLINE));
+    CHECK_RET_FALSE(parse_token(pack, TokenId::RPAREN, TokenId::NEWLINE));
+
+    CHECK_RET_FALSE(parse_token(pack, TokenId::LBRACE, TokenId::NEWLINE));
+
+    while (parse_body(pack, &fnnode));
+
+    CHECK_RET_FALSE(parse_token(pack, TokenId::RBRACE, TokenId::NEWLINE));
+
+    node->nodes.push_back(fnnode);
 
     return true;
 }

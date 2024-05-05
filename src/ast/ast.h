@@ -2,11 +2,12 @@
 
 #include "node.h"
 
-class AST {
+class Ast {
+public:
+    Ast(Node root): root(root) {}
+
+    Node * get_root_ptr();
+    void dump() const;
 private:
     Node root;
-public:
-    AST() = default;
-
-    Node * get_root();
 };

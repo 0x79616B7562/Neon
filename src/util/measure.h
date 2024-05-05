@@ -10,5 +10,5 @@ public:
     Measure();
 
     void reset();
-    void finish(char * msg) const;
+    void finish(std::string msg) const;
 };
