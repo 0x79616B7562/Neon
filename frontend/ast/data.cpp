@@ -1,7 +1,7 @@
 #include "data.h"
 
 void Data::dump(const int indent) const {
-    std::cout << ColorGray << std::string(indent * 4, '-') << Bold << ColorCyan << id << ColorReset;
+    std::cout << ColorGray << std::string(indent * 4, '-') << BoldFont << ColorCyan << id << ColorReset;
 
     if (data.has_value()) {
         std::cout << ": " << ColorYellow << data.value() << ColorReset;

@@ -9,4 +9,4 @@
 #define ColorCyan     "\033[36m"
 #define ColorGray     "\033[37m"
 #define ColorWhite    "\033[97m"
-#define Bold          "\033[1m"
+#define BoldFont      "\033[1m"

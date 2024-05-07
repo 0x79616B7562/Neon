@@ -22,9 +22,9 @@ const std::optional<Token> parse_token(Pack * pack, const TokenId to_find, const
     return {};
 }
 
-// BODY = FUNCTION
+// BODY =
 bool parse_body(Pack * pack, Node * node) {
-    return parse_function(pack, node);
+    return false;
 }
 
 // FUNCTION = 'fn' 'ident' '(' ')' '{' BODY*? '}'

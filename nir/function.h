@@ -1,12 +1,10 @@
 #pragma once
 
-#include <iostream>
-#include <optional>
 #include <string>
 #include <vector>
-#include "definitions.h"
-#include "block.h"
 #include "types.h"
+#include "block.h"
+#include "build_data.h"
 
 namespace nir {
     class Function {
@@ -15,11 +13,17 @@ namespace nir {
 
         void dump() const;
 
-        Block * create_block(const std::optional<const std::string> identifier);
+        void add_block(const std::string identifier);
+
+        void build_function(BuildData * data);
+
+        Block * get(const std::string identifier);
     private:
+        inline llvm::Type * resolve_return_type(BuildData * data) const;
+
         const std::string identifier;
         const Type return_type;
-
+    
         std::vector<Block> blocks;
     };
 }
