@@ -85,7 +85,7 @@ const std::vector<Token> Lexer::Tokenize(std::string input) const {
                         tok.value().token,
                         tmp,
                         line,
-                        column,
+                        column - uint32_t(tmp.size()) + 1,
                     });
                 }
             
@@ -103,7 +103,7 @@ const std::vector<Token> Lexer::Tokenize(std::string input) const {
         TokenId::ENDOFFILE,
         "",
         line,
-        column,
+        1,
     });
 
     return tokens;

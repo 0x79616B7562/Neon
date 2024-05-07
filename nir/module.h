@@ -15,9 +15,10 @@ namespace nir {
 
         void dump() const;
 
-        Function * create_function(const std::string identifier, Type return_type);
+        Function * create_function(const std::string identifier, const Type return_type, std::optional<Source> src);
         const std::string get_module_name() const;
         std::vector<Function> & get_functions();
+        Function * get_last_function();
     private:
         const std::string name;
 

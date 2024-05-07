@@ -74,6 +74,8 @@ else()
         -Wno-comment
         -Wno-error=unused-but-set-variable
         -Wno-error=unused-variable
+        -Wno-error=reorder
+        -Wno-reorder
     )
 endif()
 

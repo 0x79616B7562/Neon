@@ -11,7 +11,7 @@ class Parser {
 public:
     Parser();
 
-    const Ast parse(std::vector<Token> tokens) const;
+    const Ast parse(const std::string file_name, std::vector<Token> tokens) const;
 private:
     void walk(Pack * pack, Node * node) const;
 };

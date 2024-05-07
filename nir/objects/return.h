@@ -10,11 +10,16 @@
 namespace nir {
     class Return : public Object {
     public:
-        Return() {}
-        Return(ConstInt const_int): const_int(const_int) {}
+        Return(const std::optional<Source> src): Object(src) {}
+        Return(const ConstInt const_int, const std::optional<Source> src): const_int(const_int), Object(src) {}
 
-        virtual void dump() const {
-            std::cout << std::string(8, ' ') << "return" << std::endl; 
+        virtual void dump(int indent) const {
+            if (const_int.has_value()) {
+                std::cout << std::string(indent * 4, ' ') << "return " << const_int.value().type << " " << const_int.value().value << std::endl;
+                return;
+            }
+
+            std::cout << std::string(indent * 4, ' ') << "return void" << std::endl; 
         }
         
         inline virtual void build(BuildData * data) const {
@@ -32,6 +37,6 @@ namespace nir {
             }
         }
     private:
-        std::optional<ConstInt> const_int = {};
+        const std::optional<ConstInt> const_int = {};
     };
 }

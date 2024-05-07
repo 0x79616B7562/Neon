@@ -1,15 +1,20 @@
 #include "data.h"
 
-void Data::dump(const int indent) const {
-    std::cout << ColorGray << std::string(indent * 4, '-') << BoldFont << ColorCyan << id << ColorReset;
+std::optional<std::tuple<int, int>> Data::get_position() const {
+    return position;
+}
 
-    if (data.has_value()) {
-        std::cout << ": " << ColorYellow << data.value() << ColorReset;
+void Data::dump(const int indent) const {
+    if (data) {
+        std::cout << ColorYellow << id << ColorReset << "<" << "\"" << data.value() << "\"";
+    } else {
+        std::cout << ColorYellow << id << ColorReset << "<";
     }
 
     if (position.has_value()) {
-        std::cout << " <" << std::get<0>(position.value()) << ":" << std::get<1>(position.value()) << ">";
+        if (data) std::cout << " ";
+        std::cout << std::get<0>(position.value()) << ":" << std::get<1>(position.value());
     }
 
-    std::cout << std::endl;
+    std::cout << ">";
 }

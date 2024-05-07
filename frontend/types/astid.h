@@ -6,6 +6,7 @@
 enum AstId {
     ROOT,
 
+    VARIABLE,
     FUNCTION,
 };
 

@@ -11,5 +11,6 @@ struct FirstFollow {
 };
 
 const FirstFollow FIRST_FOLLOW[] = {
+    {.first = TokenId::NEWLINE, .follow = nullptr},
     {.first = TokenId::FN, .follow = parse_function},
 }; 

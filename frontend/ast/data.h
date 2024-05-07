@@ -2,19 +2,20 @@
 
 #include "../types/astid.h"
 #include "../util/clicolor.h"
-#include <any>
 #include <iostream>
 #include <optional>
 #include <string>
 #include <tuple>
+#include "../types/dataid.h"
 
 struct Data {
-    Data(AstId id) : id(id) {}
-    Data(AstId id, std::optional<std::string> data) : id(id), data(data) {}
-    Data(AstId id, std::optional<std::string> data, std::optional<std::tuple<int, int>> position) : id(id), data(data), position(position) {}
+    Data(DataId id): id(id) {}
+    Data(DataId id, std::optional<std::string> data): id(id), data(data) {}
+    Data(DataId id, std::optional<std::string> data, std::optional<std::tuple<int, int>> position): id(id), data(data), position(position) {}
+    std::optional<std::tuple<int, int>> get_position() const;
     void dump(const int indent) const;
 
-    AstId id;
+    DataId id;
     std::optional<std::string> data;
     // column --------------------\
     // line -----------------\    |

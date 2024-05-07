@@ -1,13 +1,15 @@
 #pragma once
 
 #include "data.h"
-#include <optional>
 #include <vector>
+#include <optional>
 
 struct Node {
-    Node(Data data) : data(data) {}
+    Node(const AstId id, std::vector<Data> data): id(id), data(data) {}
     void dump(const int indent) const;
+    std::optional<std::tuple<Data, std::optional<std::tuple<int, int>>>> get_data_by_id(DataId id) const;
 
-    Data data;
+    AstId id;
+    std::vector<Data> data;
     std::vector<Node> nodes;
 };

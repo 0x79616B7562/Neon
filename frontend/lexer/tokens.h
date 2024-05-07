@@ -13,7 +13,13 @@ const struct {
     {.token = TokenId::TAB, .match = (char*)"\t", .do_discard = true, .is_regex = false}, 
     {.token = TokenId::NEWLINE, .match = (char*)"\n", .do_discard = false, .is_regex = false}, 
 
+    {.token = TokenId::LET, .match = (char*)"let", .do_discard = false, .is_regex = false},
+    {.token = TokenId::MUT, .match = (char*)"mut", .do_discard = false, .is_regex = false},
     {.token = TokenId::FN, .match = (char*)"fn", .do_discard = false, .is_regex = false},
+
+    {.token = TokenId::COLON, .match = (char*)":", .do_discard = false, .is_regex = false},
+    {.token = TokenId::EQUALS, .match = (char*)"=", .do_discard = false, .is_regex = false},
+    {.token = TokenId::SEMICOLON, .match = (char*)";", .do_discard = false, .is_regex = false},
 
     {.token = TokenId::LPAREN, .match = (char*)"(", .do_discard = false, .is_regex = false},
     {.token = TokenId::RPAREN, .match = (char*)")", .do_discard = false, .is_regex = false},

@@ -1,20 +1,29 @@
 #include "function.h"
 
+#define START_INDENT 2
+
 namespace nir {
     void Function::dump() const {
-        std::cout << NirColorGreen << std::string(4, ' ') << "fn " << NirColorReset << identifier << "() " << return_type << " {" << std::endl;
+        if (return_type != Type::VOID || identifier != "main")
+            std::cout << NirColorGreen << std::string(4, ' ') << "fn " << NirColorReset << identifier << "() " << return_type << " {";
+        else
+            std::cout << NirColorGreen << std::string(4, ' ') << "fn " << NirColorReset << identifier << "()" << " {";
 
-        for (auto & block : blocks)
-            block.dump();
+        if (src.has_value())
+            std::cout << " ; src: {" << std::get<0>(src->position) << ":" << std::get<1>(src->position) << "}";
+
+        std::cout << "\n";
+
+        for (auto & obj : objects)
+            obj->dump(START_INDENT);
 
         std::cout << std::string(4, ' ') << "}" << std::endl;    
     }
 
-    void Function::add_block(const std::string identifier) {
-        blocks.push_back(Block(identifier));
-    }
+    inline llvm::Type * Function::resolve_return_type(BuildData * data) const {
+        if (identifier == "main")
+            return llvm::Type::getInt32Ty(*data->context);
 
-    inline llvm::Type * Function::resolve_return_type(BuildData * data) const { 
         switch (return_type) {
         case VOID:
             return llvm::Type::getVoidTy(*data->context);
@@ -43,25 +52,21 @@ namespace nir {
         function->addFnAttr(llvm::Attribute::OptimizeNone);
         function->addFnAttr(llvm::Attribute::NoUnwind);
 
+        auto bb = llvm::BasicBlock::Create(*data->context, "", function);
+        llvm::IRBuilder<> builder(&function->getEntryBlock(), function->getEntryBlock().begin());
+
         data->function = function;
+        data->builder = &builder;
 
-        for (auto & block : blocks)
-            block.build_block(data);
+        if (return_type == VOID && identifier != "main")
+            add_object<Return>(std::nullopt);
+        else if (identifier == "main")
+            add_object<Return>(ConstInt(Type::I32, 0), std::nullopt);
 
-        for (auto & block : blocks)
-            block.build_objects(data);
+        for (auto & obj : objects)
+            obj->build(data);
 
+        data->builder = nullptr;
         data->function = nullptr;
-    }
-
-    Block * Function::get(const std::string identifier) {
-        for (int i = 0; i < blocks.size(); i++) {
-            if (blocks[i].get_identifier() == identifier) {
-                return &blocks[i];
-            }
-        }
-
-        std::cerr << "Block doesnt exist" << std::endl;
-        exit(1);
     }
 }

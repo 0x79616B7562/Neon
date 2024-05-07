@@ -12,7 +12,13 @@ enum TokenId {
     TAB,
     NEWLINE,
 
+    LET,
+    MUT,
     FN,
+
+    COLON,
+    EQUALS,
+    SEMICOLON,
 
     LPAREN,
     RPAREN,
