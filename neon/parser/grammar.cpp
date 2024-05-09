@@ -2,6 +2,8 @@
 
 #define CHECK_RET_FALSE(val) if (!val) { return false; }
 #define CHECK_RET_FALSE_ERR(val, pck, error) if (!val) { throw_parse_error(pck, error); return false; }
+#define CHECK_NEWLINE_OR_SEMICOLON_ERR if (!parse_token(pack, TokenId::NEWLINE, {})) \
+        CHECK_RET_FALSE_ERR(parse_token(pack, TokenId::SEMICOLON, {}), pack, "expected newline or semicolon")
 
 const std::optional<Token> parse_token(Pack * pack, const TokenId to_find, const std::optional<TokenId> ignore) {
     for (std::size_t i = pack->index; i < std::size(pack->tokens); i++) {
@@ -36,11 +38,27 @@ bool parse_num(Pack * pack, Node * node) {
     return false;
 }
 
-// EXPR = NUM
+bool parse_string(Pack * pack, Node * node) {
+    auto str = parse_token(pack, TokenId::STRING, TokenId::NEWLINE);
+
+    if (str) {
+        node->nodes.push_back(Node(AstId::STRING, str->value, {{str->line, str->column}}));
+
+        return true;
+    }
+
+    return false;
+}
+
+// EXPR = NUM | STRING
 bool parse_expr(Pack * pack, Node * node) {
     auto expr = Node(AstId::EXPRESSION, {}, {});
 
     if (parse_num(pack, &expr)) {
+        node->nodes.push_back(expr);
+
+        return true;
+    } else if (parse_string(pack, &expr)) {
         node->nodes.push_back(expr);
 
         return true;
@@ -76,20 +94,53 @@ bool parse_variable(Pack * pack, Node * node) {
         CHECK_RET_FALSE_ERR(parse_expr(pack, &variable), pack, "expected expression")
     }
 
-    if (!parse_token(pack, TokenId::NEWLINE, {}))
-        CHECK_RET_FALSE_ERR(parse_token(pack, TokenId::SEMICOLON, {}), pack, "expected newline or semicolon")
+    CHECK_NEWLINE_OR_SEMICOLON_ERR
 
     node->nodes.push_back(variable);
 
     return true;
 }
 
-// BODY = VARIABLE
-bool parse_body(Pack * pack, Node * node) {
-    return parse_variable(pack, node);
+// RETURN = 'return' EXPR? ('\n' | ';')
+bool parse_return(Pack * pack, Node * node) {
+    auto rettok = parse_token(pack, TokenId::RET, TokenId::NEWLINE);
+    CHECK_RET_FALSE(rettok)
+
+    auto retnode = Node(AstId::RETURN, std::nullopt, {{rettok->line, rettok->column}}, build_return);
+
+    parse_expr(pack, &retnode);
+
+    CHECK_NEWLINE_OR_SEMICOLON_ERR
+
+    node->nodes.push_back(retnode);
+
+    return true;
 }
 
-// FUNCTION = 'fn' 'ident' '(' ')' '{' BODY*? '}'
+// CALL = 'ident' '(' ')'
+bool parse_call(Pack * pack, Node * node) {
+    auto ident = parse_token(pack, TokenId::IDENT, TokenId::NEWLINE);
+
+    CHECK_RET_FALSE(parse_token(pack, TokenId::LPAREN, TokenId::NEWLINE));
+
+    CHECK_RET_FALSE_ERR(parse_token(pack, TokenId::RPAREN, TokenId::NEWLINE), pack, "expected ')'")
+
+    node->nodes.push_back(Node(AstId::CALL, ident->value, {{ident->line, ident->column}}, build_call));
+
+    return false;
+}
+
+// IDENT = CALL
+bool parse_ident(Pack * pack, Node * node) {
+    return parse_call(pack, node);
+}
+
+// BODY = VARIABLE | RETURN | IDENT
+bool parse_body(Pack * pack, Node * node) {
+    return parse_variable(pack, node) || parse_return(pack, node) || parse_ident(pack, node);
+}
+
+// FUNCTION = 'fn' 'ident' '(' ')' 'ident' '{' BODY*? '}'
 bool parse_function(Pack * pack, Node * node) {
     auto fntok = parse_token(pack, TokenId::FN, TokenId::NEWLINE);
     CHECK_RET_FALSE_ERR(fntok, pack, "expected 'fn'")
@@ -102,6 +153,11 @@ bool parse_function(Pack * pack, Node * node) {
     CHECK_RET_FALSE_ERR(parse_token(pack, TokenId::LPAREN, TokenId::NEWLINE), pack, "expected '('")
     CHECK_RET_FALSE_ERR(parse_token(pack, TokenId::RPAREN, TokenId::NEWLINE), pack, "expected ')'")
 
+    auto ret_type = parse_token(pack, TokenId::IDENT, TokenId::NEWLINE);
+
+    if (ret_type)
+        fnnode.nodes.push_back(Node(AstId::TYPE, ret_type->value, {{ret_type->line, ret_type->column}}));
+
     CHECK_RET_FALSE_ERR(parse_token(pack, TokenId::LBRACE, TokenId::NEWLINE), pack, "expected '{'")
 
     auto body = Node(AstId::BODY, {}, {});
@@ -109,6 +165,8 @@ bool parse_function(Pack * pack, Node * node) {
     fnnode.nodes.push_back(body);
 
     CHECK_RET_FALSE_ERR(parse_token(pack, TokenId::RBRACE, TokenId::NEWLINE), pack, "expected '}'")
+
+    fnnode.nodes.push_back(Node(AstId::FUNCTION_END, std::nullopt, std::nullopt, build_function_end));
 
     node->nodes.push_back(fnnode);
 

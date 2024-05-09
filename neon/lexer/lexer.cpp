@@ -36,7 +36,7 @@ inline const std::optional<const TokenDef> Lexer::match(const std::string & inpu
     }
 
     if (!c)
-        return TokenDef { .token = INVALID, .do_discard = false, };
+        return TokenDef { .token = TokenId::INVALID, .do_discard = false, };
 
     return {};
 }

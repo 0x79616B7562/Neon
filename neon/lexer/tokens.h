@@ -16,6 +16,7 @@ const struct {
     {.token = TokenId::LET, .match = (char*)"let", .do_discard = false, .is_regex = false},
     {.token = TokenId::MUT, .match = (char*)"mut", .do_discard = false, .is_regex = false},
     {.token = TokenId::FN, .match = (char*)"fn", .do_discard = false, .is_regex = false},
+    {.token = TokenId::RET, .match = (char*)"return", .do_discard = false, .is_regex = false},
 
     {.token = TokenId::COLON, .match = (char*)":", .do_discard = false, .is_regex = false},
     {.token = TokenId::EQUALS, .match = (char*)"=", .do_discard = false, .is_regex = false},

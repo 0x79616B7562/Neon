@@ -19,6 +19,9 @@ void Node::dump(const int indent) const {
     if (position)
         std::cout << "<" << std::get<0>(position.value()) << ":" << std::get<1>(position.value()) << "> ";
 
+    if (build)
+        std::cout << ColorRed << BoldFont << "B " << ColorReset;
+
     if (nodes.size() > 0) {
         std::cout << "{" << std::endl;
 
@@ -29,6 +32,18 @@ void Node::dump(const int indent) const {
     } else {
         std::cout << std::endl;
     }
+}
+
+bool Node::has_any(AstId id) const {
+    for (auto node : nodes) {
+        if (node.id == id)
+            return true;
+
+        if (node.has_any(id))
+            return true;
+    }
+
+    return false;
 }
 
 std::optional<Node *> Node::get_node(AstId id) {

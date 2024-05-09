@@ -9,4 +9,6 @@ void throw_parse_error(const Pack * pack, const char * message) {
     std::cout << ColorCyan << tok.line << " | " << ColorReset << src << "\n";
     std::cout << ColorCyan << std::string(std::to_string(tok.line).length(), ' ') << " |";
     std::cout << ColorRed << std::string(tok.column, ' ') << "^ " << message << ", found " << tok.token << ColorReset << "\n" << std::endl;
+
+    exit(0);
 }

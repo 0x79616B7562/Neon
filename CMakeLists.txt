@@ -14,6 +14,12 @@ add_definitions(
 
 ### EXECUTABLE
 
+execute_process(COMMAND llvm-config --includedir OUTPUT_VARIABLE LLVM_INCLUDE)
+execute_process(COMMAND llvm-config --libs all OUTPUT_VARIABLE LLVM_LIBRARIES)
+
+string(STRIP ${LLVM_INCLUDE} LLVM_INCLUDE)
+string(STRIP ${LLVM_LIBRARIES} LLVM_LIBRARIES)
+
 file(
     GLOB
     NEONC_SRC_FILES
@@ -22,6 +28,9 @@ file(
 )
 
 add_executable(neon ${NEONC_SRC_FILES})
+
+target_include_directories(neon PRIVATE ${LLVM_INCLUDE})
+target_link_libraries(neon ${LLVM_LIBRARIES})
 
 ###
 

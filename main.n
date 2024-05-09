@@ -1,3 +1,9 @@
 fn main() {
-    let mut ahoj: i32
+    let mut ahoj: i32 = 10
+
+    test()
+}
+
+fn test() f32 {
+    return 10
 }

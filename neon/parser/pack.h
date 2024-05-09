@@ -10,6 +10,7 @@ struct Pack {
     const std::string file_name;
     Token get() const;
     Token get_next() const;
+    Token get_previous() const;
     bool is_at_end() const;
     void next();
     

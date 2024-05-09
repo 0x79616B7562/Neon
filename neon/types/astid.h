@@ -3,17 +3,21 @@
 #include <ostream>
 #include <sstream>
 
-enum AstId {
+enum class AstId {
     ROOT,
 
     VARIABLE,
     MUTABLE,
     FUNCTION,
+    FUNCTION_END,
     BODY,
+    RETURN,
+    CALL,
 
     TYPE,
     EXPRESSION,
     NUMBER,
+    STRING,
 };
 
 std::ostream & operator<<(std::ostream & os, const AstId id);

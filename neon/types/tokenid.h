@@ -3,7 +3,7 @@
 #include <ostream>
 #include <sstream>
 
-enum TokenId {
+enum class TokenId {
     ENDOFFILE,
 
     INVALID,
@@ -15,6 +15,7 @@ enum TokenId {
     LET,
     MUT,
     FN,
+    RET,
 
     COLON,
     EQUALS,
