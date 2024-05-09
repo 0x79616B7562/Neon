@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stdio.h>
+#include <filesystem>
+#include <regex>
 #ifdef WINDOWS
     #include <direct.h>
     #define GetCurrentDir _getcwd
@@ -10,5 +12,5 @@
 #endif
 #include <string>
 
-std::string get_cwd(); 
-
+const std::string get_cwd(); 
+const std::string get_root();

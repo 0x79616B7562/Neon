@@ -37,7 +37,7 @@ void Parser::walk(Pack * pack, Node * node) const {
 
 const Ast Parser::parse(const std::string file_name, std::vector<Token> tokens) const {
     auto pack = Pack(file_name, tokens);
-    auto ast = Ast(Node(AstId::ROOT, {}));
+    auto ast = Ast(Node(AstId::ROOT, {}, {}));
 
     walk(&pack, ast.get_root_ptr());
 
