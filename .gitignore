@@ -1,10 +1,9 @@
 TODO*
 /build
+/release
 exec
 *.ll
 *.o
 *.out
 *.so
-*.c
 *.a
-Makefile

@@ -1,9 +1,13 @@
-fn main() {
-    let mut ahoj: i32 = 10
+fn printf(a: str, a: ...i8) i32;
 
-    test()
+fn test(a: i32, b: i32) str {
+    return "from_test\n"
 }
 
-fn test() f32 {
+fn ahoj() i32 {
     return 10
+}
+
+fn main() {
+    printf("runningprogram\n")
 }

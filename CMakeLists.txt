@@ -7,12 +7,26 @@ project(${TARGET_NAME} VERSION ${VERSION} LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DNDEBUG")
+
 add_definitions(
     -D__STDC_LIMIT_MACROS
     -D__STDC_CONSTANT_MACROS
 )
 
-### EXECUTABLE
+## VERSION OF LLVM
+
+execute_process(COMMAND llvm-config --version OUTPUT_VARIABLE LLVM_VERSION)
+message("LLVM VERSION: " ${LLVM_VERSION})
+string(STRIP ${LLVM_VERSION} LLVM_VERSION)
+
+string(COMPARE NOTEQUAL ${LLVM_VERSION} "17.0.1" LLVM_VERSION_PASSED)
+
+if(${LLVM_VERSION_PASSED})
+    message(FATAL_ERROR "LLVM VERSION REQUIRED: 17.0.1")
+endif()
+
+### NEONC
 
 execute_process(COMMAND llvm-config --includedir OUTPUT_VARIABLE LLVM_INCLUDE)
 execute_process(COMMAND llvm-config --libs all OUTPUT_VARIABLE LLVM_LIBRARIES)
@@ -23,23 +37,24 @@ string(STRIP ${LLVM_LIBRARIES} LLVM_LIBRARIES)
 file(
     GLOB
     NEONC_SRC_FILES
-    ${PROJECT_SOURCE_DIR}/neon/*.cpp
-    ${PROJECT_SOURCE_DIR}/neon/*/*.cpp
+    ${PROJECT_SOURCE_DIR}/neon/neonc/*.cpp
+    ${PROJECT_SOURCE_DIR}/neon/neonc/*/*.cpp
 )
 
-add_executable(neon ${NEONC_SRC_FILES})
+add_executable(neonc ${NEONC_SRC_FILES})
 
-target_include_directories(neon PRIVATE ${LLVM_INCLUDE})
-target_link_libraries(neon ${LLVM_LIBRARIES})
+target_include_directories(neonc PRIVATE ${LLVM_INCLUDE} include)
+target_link_libraries(neonc ${LLVM_LIBRARIES})
+
+target_precompile_headers(neonc PRIVATE include/neonc.h)
 
 ###
 
 if(MSVC)
-    # target_compile_options(${TARGET_NAME} PRIVATE /W4 /WX)
     message(FATAL_ERROR "MSVC UNTESTED")
 else()
     target_compile_options(
-        neon PRIVATE
+        neonc PRIVATE
         -Wall
         -Wextra
         -Wpedantic
@@ -56,3 +71,10 @@ else()
     )
 endif()
 
+if (UNIX AND NOT APPLE)
+    execute_process(COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version ERROR_QUIET OUTPUT_VARIABLE ld_version)
+    if ("${ld_version}" MATCHES "GNU gold")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
+    endif()
+endif()
