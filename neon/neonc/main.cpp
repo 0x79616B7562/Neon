@@ -49,6 +49,8 @@ void build(const std::string entry) {
     for (auto tok : tokens) tok.dump();
     std::cout << std::endl;
 
+    return;
+
     auto parser = Parser();
     auto ast = parser.parse_ast(file_path, tokens);
     ast.dump();

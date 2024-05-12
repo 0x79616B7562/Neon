@@ -1,111 +1,59 @@
 #include "lexer.h"
-#include <cstddef>
 
-Lexer::Lexer() {
-    for (std::size_t i = 0; i < std::size(TOKENS); i++) {
-        auto tok = TokenDef {
-            TOKENS[i].token,
-            TOKENS[i].match,
-            TOKENS[i].do_discard,
-            TOKENS[i].is_regex,
-        };
+#define cmp(str, id) if (buffer == str) { add_token(tokens, id, buffer, line, column); buffer.clear(); }
 
-        if (tok.is_regex) {
-            tok.regex = std::regex(TOKENS[i].match);
-        }
+inline void add_token(std::vector<Token> & tokens, TokenId token, std::string value, uint32_t & line, uint32_t & column) {
+    tokens.push_back(Token {
+        token,
+        value,
+        line,
+        column
+    });
 
-        tokens[i] = tok;
+    if (token == TokenId::NEWLINE) {
+        line++;
+        column = 0;
     }
 }
 
-inline const std::optional<const TokenDef> Lexer::match(const std::string input) const {
-    bool c = false;
-
-    for (auto tok : tokens) {
-        if (tok.is_regex) {
-            if (std::regex_match(input, tok.regex)) {
-                return tok;
-            }
-        } else {
-            if (input == tok.match) {
-                return tok;
-            }  else if (input.find(tok.match) != std::string::npos) {
-                c = true;
-            }
-        }
-    }
-
-    if (!c)
-        return TokenDef { .token = TokenId::INVALID, .do_discard = false, };
-
-    return {};
-}
-
-inline bool Lexer::do_discard_token(const TokenId id) const {
-    for (auto tok : tokens) {
-        if (tok.token == id) {
-            return tok.do_discard;
-        }
-    }
-
-    return false;
-}
-
-const std::vector<Token> Lexer::Tokenize(std::string _input) const {
-    std::string input = _input + "\n";
-    std::string buf;
-    
+const std::vector<Token> Lexer::Tokenize(std::string input) const {
     std::vector<Token> tokens;
+    std::string buffer = "";
 
-    bool found = false;
-    uint32_t line = 1;
-    uint32_t column = 0;
+    uint32_t line = 1, column = 0;
 
-    for (std::size_t i = 0; i < input.length(); i++) {
-        buf += input[i];
+    for (long unsigned int i = 0; i < input.length(); i++) {
+        buffer += input[i];
 
         column++;
 
-        auto tok = match(buf);
-
-        if (tok.has_value())
-            found = true;
-        else if (!tok.has_value() && found) {
-            found = false;
-
-            auto tmp = buf.substr(0, buf.size() - 1);
-
-            i--;
-            column--;
-
-            auto tok = match(tmp);
-
-            if (tok.has_value()) {
-                if (!do_discard_token(tok.value().token)) {
-                    tokens.push_back(Token {
-                        tok.value().token,
-                        tmp,
-                        line,
-                        column - uint32_t(tmp.size()) + 1,
-                    });
-                }
-            
-                if (tok.value().token == TokenId::NEWLINE) {
-                    line++;
-                    column = 0;
-                }
+        cmp("fn",          TokenId::FN)
+        else cmp("mut",    TokenId::MUT)
+        else cmp("return", TokenId::RET)
+        else cmp("let",    TokenId::LET)
+        else cmp("(",      TokenId::LPAREN)
+        else cmp(")",      TokenId::RPAREN)
+        else cmp("{",      TokenId::LBRACE)
+        else cmp("}",      TokenId::RBRACE)
+        else cmp(":",      TokenId::COLON)
+        else cmp("=",      TokenId::EQUALS)
+        else cmp(",",      TokenId::COMMA)
+        else cmp(";",      TokenId::SEMICOLON)
+        else cmp(".",      TokenId::DOT)
+        else cmp("*",      TokenId::ASTERISK)
+        else cmp("\n",     TokenId::NEWLINE)
+        else {
+            if (buffer == " " || buffer == "\t") {
+                buffer.clear();
+                
+                continue;
             }
 
-            buf = "";
+            // ident, num, string, singleline comment
         }
     }
 
-    tokens.push_back(Token {
-        TokenId::ENDOFFILE,
-        "",
-        line + 1,
-        column,
-    });
+    std::cout << buffer << std::endl;
 
     return tokens;
 }
