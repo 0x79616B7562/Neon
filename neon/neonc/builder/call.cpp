@@ -16,13 +16,26 @@ llvm::Value * build_call(Node * node, Module * module) {
         auto expr = arg.get_node(AstId::EXPRESSION);
 
         if (expr) {
-            auto value = build_expression(expr.value(), module, func->getArg(c)->getType());
+            auto arg = func->getArg(c);
 
-            auto load = build_load(module, value, func->getArg(c)->getType());
+            if (arg == nullptr) {
+                throw std::invalid_argument("arg is nullptr");
+            }
 
-            args.push_back(load);
+            auto value = build_expression(
+                expr.value(),
+                module,
+                arg->getType()
+            );
+
+            args.push_back(value);
 
             std::vector<llvm::Attribute::AttrKind> attrs;
+
+            if (arg->hasAttribute(llvm::Attribute::NoUndef))
+                attrs.push_back(llvm::Attribute::NoUndef);
+            if (arg->hasAttribute(llvm::Attribute::Dereferenceable))
+                attrs.push_back(llvm::Attribute::Dereferenceable);
 
             // TODO: resolve attributes
 

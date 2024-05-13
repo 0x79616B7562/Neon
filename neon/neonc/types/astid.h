@@ -8,14 +8,15 @@ enum class AstId {
 
     VARIABLE,
     MUTABLE,
+
     FUNCTION,
     FUNCTION_END,
+    
     BODY,
     RETURN,
     CALL,
 
     ARGUMENT,
-    VARIADIC,
     TYPE,
     EXPRESSION,
     NUMBER,

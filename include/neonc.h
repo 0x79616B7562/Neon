@@ -42,6 +42,7 @@
 #include <llvm/Transforms/Scalar/DeadStoreElimination.h>
 #include <llvm/Transforms/Scalar/DCE.h>
 #include <llvm/Transforms/Scalar/ADCE.h>
+#include <llvm/Transforms/Scalar/SCCP.h>
 
 #include <chrono>
 #include <stdio.h>

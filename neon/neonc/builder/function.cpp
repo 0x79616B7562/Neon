@@ -20,7 +20,7 @@ llvm::Value * build_function(Node * node, Module * module) {
             _return_type.has_value() ? string_to_type(_return_type.value()->data.value(), module) : 
             llvm::Type::getVoidTy(*module->context),
         args,
-        node->contains(AstId::VARIADIC)
+        false
     );
 
     auto function = llvm::Function::Create(
@@ -30,37 +30,49 @@ llvm::Value * build_function(Node * node, Module * module) {
         *module->module
     );
 
+    std::map<std::string, llvm::Value *> function_arguments;
+    uint32_t index = 0;
+    for (auto arg : node->get_all(AstId::ARGUMENT)) {
+        if (!arg.data.has_value())
+            throw std::invalid_argument("Argument node must have inner data");
+
+        function_arguments[arg.data.value()] = function->getArg(index);
+
+        index++;
+    }
+
     // TODO: make better fn and param attrs
-    function->addFnAttr(llvm::Attribute::MustProgress);
     function->addFnAttr(llvm::Attribute::NoInline);
     function->addFnAttr(llvm::Attribute::OptimizeNone);
     function->addFnAttr(llvm::Attribute::NoUnwind);
 
     if (!node->contains(AstId::BODY)) {
+        function->addParamAttr(0, llvm::Attribute::NoUndef);
+
         return function;
     }
 
     llvm::BasicBlock::Create(*module->context, "", function);
     std::shared_ptr<llvm::IRBuilder<>> builder(new llvm::IRBuilder<>(&function->getEntryBlock(), function->getEntryBlock().begin()));
 
-    module->functions[fnname] = function;
+    module->functions[fnname] = {function, function_arguments};
     module->builders[fnname] = std::move(builder);
-    module->pointer = fnname;
+    module->set_pointer(fnname);
 
-    return module->functions[fnname];
+    return std::get<0>(module->functions[fnname]);
 }
 
 llvm::Value * build_function_end(Node * node, Module * module) {
-    if (module->get_function()->getName() == "main") {
+    if (std::get<0>(module->get_function())->getName() == "main") {
         module->get_builder()->CreateRet(llvm::ConstantInt::get(llvm::Type::getInt32Ty(*module->context), 0));
-    } else if (module->get_function()->getReturnType() == llvm::Type::getVoidTy(*module->context)) {
+    } else if (std::get<0>(module->get_function())->getReturnType() == llvm::Type::getVoidTy(*module->context)) {
         module->get_builder()->CreateRetVoid();
     }
 
     std::string str;
     llvm::raw_string_ostream output(str);
 
-    if (llvm::verifyFunction(*module->get_function(), &output)) {
+    if (llvm::verifyFunction(*std::get<0>(module->get_function()), &output)) {
         module->dump();
 
         std::cerr << output.str() << std::endl;

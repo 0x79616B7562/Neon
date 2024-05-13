@@ -15,7 +15,6 @@ std::ostream & operator<<(std::ostream & os, const AstId id) {
         case AstId::EXPRESSION: return os << "Expression";
         case AstId::CALL: return os << "Call";
         case AstId::ARGUMENT: return os << "Argument";
-        case AstId::VARIADIC: return os << "Variadic";
         case AstId::IDENTIFIER: return os << "Identifier";
         default: return os << "UNKNOWN AST ID: " << id;
     }

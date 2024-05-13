@@ -7,7 +7,7 @@ inline void add_token(std::vector<Token> & tokens, TokenId token, std::string va
         token,
         value,
         line,
-        column
+        column - uint32_t(value.size()) + 1
     });
 
     if (token == TokenId::NEWLINE) {
@@ -21,12 +21,22 @@ const std::vector<Token> Lexer::Tokenize(std::string input) const {
     std::string buffer = "";
 
     uint32_t line = 1, column = 0;
+    bool in_string = false;
+
+    const auto IDENTIFIER = std::regex((char*)"^[a-zA-Z_]+[a-zA-Z0-9_]*$");
+    const auto NUMBER = std::regex((char*)"^[-]?[0-9_]+[.]?[0-9_]*?$");
+    const auto SINGLELINECOMMENT = std::regex((char*)"^\\/\\/[^\\n\\r]+$");
+    const auto STRING = std::regex((char*)"^\"(?:\\\\.|[^\"\\\\])*\"$");
 
     for (long unsigned int i = 0; i < input.length(); i++) {
         buffer += input[i];
 
         column++;
 
+        if (in_string)
+            goto in_string_block;
+
+toks:
         cmp("fn",          TokenId::FN)
         else cmp("mut",    TokenId::MUT)
         else cmp("return", TokenId::RET)
@@ -43,17 +53,54 @@ const std::vector<Token> Lexer::Tokenize(std::string input) const {
         else cmp("*",      TokenId::ASTERISK)
         else cmp("\n",     TokenId::NEWLINE)
         else {
-            if (buffer == " " || buffer == "\t") {
-                buffer.clear();
-                
+            if (buffer == "\"") {
+                in_string = true;
+    
                 continue;
             }
 
-            // ident, num, string, singleline comment
+            if (buffer == " " || buffer == "\t") {
+                buffer.pop_back();
+
+                goto toks;
+            }
+
+            auto tmp = buffer;
+            tmp.pop_back();
+
+            if (!std::regex_match(buffer, IDENTIFIER) && std::regex_match(tmp, IDENTIFIER)) {
+                add_token(tokens, TokenId::IDENT, tmp, line, column);
+                buffer = buffer.back();
+            
+                goto toks;
+            } else if (!std::regex_match(buffer, NUMBER) && std::regex_match(tmp, NUMBER)) {
+                add_token(tokens, TokenId::NUM, tmp, line, column);
+                buffer = buffer.back();
+            
+                goto toks;
+            } else if (!std::regex_match(buffer, SINGLELINECOMMENT) && std::regex_match(tmp, SINGLELINECOMMENT)) {
+                buffer = buffer.back();
+
+                goto toks;
+            }
+        }
+
+        continue;
+in_string_block:
+        if (buffer.back() == '\"') {
+            in_string = false;
+        
+            add_token(tokens, TokenId::STRING, buffer, line, column);
+            buffer = "";
         }
     }
 
-    std::cout << buffer << std::endl;
+    tokens.push_back(Token {
+        TokenId::ENDOFFILE,
+        "",
+        line,
+        1
+    });
 
     return tokens;
 }

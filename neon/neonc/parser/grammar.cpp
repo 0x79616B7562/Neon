@@ -228,28 +228,6 @@ bool parse_function_arguments(Pack * pack, Node * node) {
 
         expect(pack, TokenId::COLON, TokenId::NEWLINE, "expected ':'");
 
-        auto dot = accept(pack, TokenId::DOT, TokenId::NEWLINE);
-
-        if (dot) {
-            expect(pack, TokenId::DOT, {}, "expected '...'");
-            expect(pack, TokenId::DOT, {}, "expected '...'");
-
-            auto _type = parse_type(pack);
-
-            if (!_type) {
-                throw_parse_error(pack, "expected type");
-
-                return false;
-            }
-
-            auto argument = Node(AstId::VARIADIC, ident->value, {{dot->line, dot->column}});
-            argument.nodes.push_back(Node(AstId::TYPE, _type->value, {{_type->line, _type->column}}));
-
-            node->nodes.push_back(argument);
-
-            break;
-        }
-
         auto _type = parse_type(pack);
 
         if (!_type) {

@@ -64,6 +64,7 @@ Target::Target() {
     pass->fpm->addPass(llvm::DSEPass());
     pass->fpm->addPass(llvm::DCEPass());
     pass->fpm->addPass(llvm::ADCEPass());
+    pass->fpm->addPass(llvm::SCCPPass());
 
     pass->pb.registerModuleAnalyses(*pass->mam);
     pass->pb.registerFunctionAnalyses(*pass->fam);
@@ -85,7 +86,7 @@ void Target::dump_target_triple() const {
 
 void Target::optimize(Module * module) const {
     for (auto t : module->functions) {
-        pass->fpm->run(*t.second, *pass->fam);
+        pass->fpm->run(*std::get<0>(t.second), *pass->fam);
     }
 }
 

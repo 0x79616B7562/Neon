@@ -28,7 +28,7 @@ void build_ast(Node * node, Module * module) {
     for (long unsigned int i = 0; i < node->nodes.size(); i++) {
         if (node->nodes[i].id == AstId::FUNCTION) {
             auto name = node->nodes[i].data.value();
-            module->pointer = name;
+            module->set_pointer(name);
 
             for (long unsigned int j = 0; j < node->nodes[i].nodes.size(); j++)
                 build_bodies(&node->nodes[i].nodes[j], module);
@@ -48,8 +48,6 @@ void build(const std::string entry) {
     auto tokens = lexer.Tokenize(file);
     for (auto tok : tokens) tok.dump();
     std::cout << std::endl;
-
-    return;
 
     auto parser = Parser();
     auto ast = parser.parse_ast(file_path, tokens);

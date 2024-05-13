@@ -8,7 +8,11 @@ void Module::clear() {
     local_variables.clear();
 }
 
-llvm::Function * Module::get_function() {
+void Module::set_pointer(std::string _pointer) {
+    pointer = _pointer;
+}
+
+ std::tuple<llvm::Function *, std::map<std::string, llvm::Value *>> Module::get_function() {
     return functions[pointer];
 }
 
