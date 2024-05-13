@@ -20,6 +20,8 @@ bool Pack::is_at_end() const {
     return index >= tokens.size() - 1;
 }
 
-void Pack::next() {
+Token Pack::next() {
     index++;
+
+    return tokens[index];
 }

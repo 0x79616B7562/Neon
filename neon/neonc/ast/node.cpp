@@ -34,6 +34,10 @@ void Node::dump(const int indent) const {
     }
 }
 
+void Node::add_node(AstId id, const std::optional<std::string> data) {
+    nodes.push_back(Node(id, data, std::nullopt));
+}
+
 bool Node::has_any(AstId id) const {
     for (auto node : nodes) {
         if (node.id == id)
@@ -54,12 +58,18 @@ bool Node::contains(AstId id) const {
     return false;
 }
 
-std::vector<Node> Node::get_all(AstId id) const {
-    std::vector<Node> result;
+std::vector<Node *> Node::get_all(AstId id, bool recursive) {
+    std::vector<Node *> result;
 
-    for (auto node : nodes)
-        if (node.id == id)
-            result.push_back(node);
+    for (unsigned long int i = 0; i < nodes.size(); i++) {
+        if (nodes[i].id == id)
+            result.push_back(&nodes[i]);
+        
+        if (recursive) {
+            auto children = nodes[i].get_all(id, true);
+            for (auto _a : children) result.push_back(_a);
+        }
+    }
 
     return result;
 }

@@ -51,11 +51,12 @@ void build(const std::string entry) {
 
     auto parser = Parser();
     auto ast = parser.parse_ast(file_path, tokens);
-    ast.dump();
-    std::cout << std::endl;
 
     auto analyzer = Analyzer();
     analyzer.analyze(&ast);
+
+    ast.dump();
+    std::cout << std::endl;
 
     auto target = Target();
     target.dump_target_triple();

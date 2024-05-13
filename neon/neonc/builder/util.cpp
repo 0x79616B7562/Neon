@@ -37,6 +37,8 @@ std::string double_backslash_to_single(std::string input) {
 
 llvm::Type * string_to_type(const std::string _type, Module * module) {
     // simple
+    if (_type == "bool") return llvm::Type::getInt1Ty(*module->context);
+
     if (_type == "i8") return llvm::Type::getInt8Ty(*module->context);
     if (_type == "i16") return llvm::Type::getInt16Ty(*module->context);
     if (_type == "i32") return llvm::Type::getInt32Ty(*module->context);
@@ -55,6 +57,8 @@ llvm::Value * create_constant(llvm::Type * _type, std::string value, Module * mo
     if (_type == llvm::Type::getInt8PtrTy(*module->context)) return module->get_builder()->CreateGlobalStringPtr(llvm::StringRef(double_backslash_to_single(value)));
 
     auto _value = value == "" ? "0" : value;
+
+    if (_type == llvm::Type::getInt1Ty(*module->context)) return module->get_builder()->getInt1(std::stoi(_value));
 
     if (_type == llvm::Type::getInt8Ty(*module->context)) return module->get_builder()->getInt8(std::stoll(_value));
     if (_type == llvm::Type::getInt16Ty(*module->context)) return module->get_builder()->getInt16(std::stoll(_value));

@@ -2,7 +2,6 @@
 
 #include <neonc.h>
 
-
 enum class AstId {
     ROOT,
 
@@ -19,7 +18,9 @@ enum class AstId {
     ARGUMENT,
     TYPE,
     EXPRESSION,
+    FLOATING_NUMBER,
     NUMBER,
+    BOOLEAN,
     STRING,
     IDENTIFIER,
 };

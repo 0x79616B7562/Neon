@@ -16,12 +16,41 @@ enum class TokenId {
     FN,
     RET,
 
+    TRUE,
+    FALSE,
+
     COLON,
     EQUALS,
     COMMA,
     SEMICOLON,
     DOT,
+
     ASTERISK,
+    PLUS,
+    MINUS,
+    SLASH,
+    PERCENT,
+    
+    EQUAL_TO,
+    NOT_EQUAL_TO,
+    GREATER_THAN,
+    LESS_THAN,
+    GREATER_THAN_OR_EQUAL_TO,
+    LESS_THAN_OR_EQUAL_TO,
+    
+    NOT,
+    AND,
+    OR,
+    
+    BITWISE_NOT,
+    BITWISE_AND,
+    BITWISE_OR,
+    BITWISE_XOR,
+    BITWISE_LEFT_SHIFT,
+    BITWISE_RIGHT_SHIFT,
+    
+    INCREMENT,
+    DECREMENT,
 
     LPAREN,
     RPAREN,
@@ -30,7 +59,8 @@ enum class TokenId {
     RBRACE,
 
     IDENT,
-    NUM,
+    FLOATING_NUMBER,
+    NUMBER,
     STRING,
 
     SINGLELINECOMMENT,

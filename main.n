@@ -1,13 +1,3 @@
-fn puts(inp: str) i32;
-
-fn t(i: str) str {
-    return i
-}
-
-fn ahoj(i: str) str {
-    return t(i)
-}
-
 fn main() {
-    puts(ahoj("hey"))
+    let mut t = false;
 }

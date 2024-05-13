@@ -16,15 +16,17 @@ inline void add_token(std::vector<Token> & tokens, TokenId token, std::string va
     }
 }
 
-const std::vector<Token> Lexer::Tokenize(std::string input) const {
+const std::vector<Token> Lexer::Tokenize(std::string _input) const {
     std::vector<Token> tokens;
     std::string buffer = "";
+    std::string input = _input + "\n";
 
     uint32_t line = 1, column = 0;
     bool in_string = false;
 
     const auto IDENTIFIER = std::regex((char*)"^[a-zA-Z_]+[a-zA-Z0-9_]*$");
-    const auto NUMBER = std::regex((char*)"^[-]?[0-9_]+[.]?[0-9_]*?$");
+    const auto NUMBER = std::regex((char*)"^[-]?[0-9]+[0-9_]*$");
+    const auto FLOATING_NUMBER = std::regex((char*)"^[-]?[0-9]+[0-9_]*[.][0-9_]+$");
     const auto SINGLELINECOMMENT = std::regex((char*)"^\\/\\/[^\\n\\r]+$");
     const auto STRING = std::regex((char*)"^\"(?:\\\\.|[^\"\\\\])*\"$");
 
@@ -41,6 +43,8 @@ toks:
         else cmp("mut",    TokenId::MUT)
         else cmp("return", TokenId::RET)
         else cmp("let",    TokenId::LET)
+        else cmp("true",   TokenId::TRUE)
+        else cmp("false",  TokenId::FALSE)
         else cmp("(",      TokenId::LPAREN)
         else cmp(")",      TokenId::RPAREN)
         else cmp("{",      TokenId::LBRACE)
@@ -51,6 +55,32 @@ toks:
         else cmp(";",      TokenId::SEMICOLON)
         else cmp(".",      TokenId::DOT)
         else cmp("*",      TokenId::ASTERISK)
+        else cmp("+",      TokenId::PLUS)
+        else cmp("-",      TokenId::MINUS)
+        else if (buffer == "/") {
+            if (input[i + 1] != '/') { // exclude comment
+                add_token(tokens, TokenId::SLASH, buffer, line, column);
+                buffer.clear();
+            }
+        }
+        else cmp("/",      TokenId::SLASH)
+        else cmp("%",      TokenId::PERCENT)
+        // EQUAL_TO, ==
+        // NOT_EQUAL_TO, !=
+        // GREATER_THAN, >
+        // LESS_THAN, <
+        // GREATER_THAN_OR_EQUAL_TO, >=
+        // LESS_THAN_OR_EQUAL_TO, <=
+        // NOT, !
+        // AND, &&
+        // OR, ||
+        // BITWISE_AND, &
+        // BITWISE_OR, |
+        // BITWISE_XOR, ^
+        // BITWISE_LEFT_SHIFT, <<
+        // BITWISE_RIGHT_SHIFT, >>
+        // INCREMENT, ++
+        // DECREMENT, --
         else cmp("\n",     TokenId::NEWLINE)
         else {
             if (buffer == "\"") {
@@ -74,7 +104,14 @@ toks:
             
                 goto toks;
             } else if (!std::regex_match(buffer, NUMBER) && std::regex_match(tmp, NUMBER)) {
-                add_token(tokens, TokenId::NUM, tmp, line, column);
+                if (input[i + 1] != '.' && input[i] != '.') {
+                    add_token(tokens, TokenId::NUMBER, tmp, line, column);
+                    buffer = buffer.back();
+
+                    goto toks;
+                }
+            } else if (!std::regex_match(buffer, FLOATING_NUMBER) && std::regex_match(tmp, FLOATING_NUMBER)) {
+                add_token(tokens, TokenId::FLOATING_NUMBER, tmp, line, column);
                 buffer = buffer.back();
             
                 goto toks;
@@ -89,8 +126,11 @@ toks:
 in_string_block:
         if (buffer.back() == '\"') {
             in_string = false;
-        
+           
             add_token(tokens, TokenId::STRING, buffer, line, column);
+           
+            line += std::accumulate(buffer.cbegin(), buffer.cend(), 0, [](int prev, char c) { return c != '\n' ? prev : prev + 1; });
+
             buffer = "";
         }
     }

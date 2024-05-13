@@ -13,7 +13,7 @@ llvm::Value * build_call(Node * node, Module * module) {
 
     uint c = 0;
     for (auto arg : node->get_all(AstId::ARGUMENT)) {
-        auto expr = arg.get_node(AstId::EXPRESSION);
+        auto expr = arg->get_node(AstId::EXPRESSION);
 
         if (expr) {
             auto arg = func->getArg(c);

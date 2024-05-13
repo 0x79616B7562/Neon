@@ -23,6 +23,18 @@ const std::optional<Token> accept(Pack * pack, const TokenId to_find, const std:
     return {};
 }
 
+const std::optional<Token> accept_any(Pack * pack, const std::vector<TokenId> to_find, const std::optional<TokenId> ignore) {
+    for (auto t : to_find) {
+        auto result = accept(pack, t, ignore);
+
+        if (result.has_value()) {
+            return result;
+        }
+    }
+
+    return {};
+}
+
 const std::optional<Token> expect(Pack * pack, const TokenId to_find, const std::optional<TokenId> ignore, const char * message) {
     auto result = accept(pack, to_find, ignore);
 
@@ -74,10 +86,37 @@ bool parse_arguments(Pack * pack, Node * node) {
 }
 
 bool parse_number(Pack * pack, Node * node) {
-    auto num = accept(pack, TokenId::NUM, TokenId::NEWLINE);
+    auto num = accept(pack, TokenId::NUMBER, TokenId::NEWLINE);
 
     if (num) {
         node->nodes.push_back(Node(AstId::NUMBER, num->value, {{num->line, num->column}}));
+
+        return true;
+    }
+
+    auto fnum = accept(pack, TokenId::FLOATING_NUMBER, TokenId::NEWLINE);
+
+    if (fnum) {
+        node->nodes.push_back(Node(AstId::FLOATING_NUMBER, fnum->value, {{fnum->line, fnum->column}}));
+
+        return true;
+    }
+
+    return false;
+}
+
+bool parse_boolean(Pack * pack, Node * node) {
+    auto _true = accept(pack, TokenId::TRUE, TokenId::NEWLINE);
+    auto _false = accept(pack, TokenId::FALSE, TokenId::NEWLINE);
+
+    if (_true) {
+        node->nodes.push_back(Node(AstId::BOOLEAN, "1", {{_true->line, _true->column}}));
+
+        return true;
+    }
+
+    if (_false) {
+        node->nodes.push_back(Node(AstId::BOOLEAN, "0", {{_false->line, _false->column}}));
 
         return true;
     }
@@ -125,21 +164,18 @@ bool parse_string(Pack * pack, Node * node) {
 bool parse_expr(Pack * pack, Node * node) {
     auto expr = Node(AstId::EXPRESSION, {}, {});
 
-    if (parse_number(pack, &expr)) {
-        node->nodes.push_back(expr);
-
-        return true;
-    } else if (parse_ident_in_expr(pack, &expr)) {
-        node->nodes.push_back(expr);
-
-        return true;
-    } else if (parse_string(pack, &expr)) {
-        node->nodes.push_back(expr);
-
-        return true;
+    if (!(
+        parse_boolean(pack, &expr)
+        || parse_number(pack, &expr)
+        || parse_ident_in_expr(pack, &expr)
+        || parse_string(pack, &expr)
+    )) {
+        return false;
     }
 
-    return false;
+    node->nodes.push_back(expr);
+
+    return true;
 }
 
 bool parse_return(Pack * pack, Node * node) {
@@ -191,7 +227,6 @@ bool parse_variable(Pack * pack, Node * node) {
 
             return false;
         }
-
 
         varnode.nodes.push_back(Node(AstId::TYPE, _type->value, {{_type->line, _type->column}}));
 

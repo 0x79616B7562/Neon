@@ -15,10 +15,12 @@ struct Node {
 
     void dump(const int indent) const;
 
+    void add_node(AstId id, const std::optional<std::string> data);
+
     std::optional<Node *> get_node(AstId id);
     bool has_any(AstId id) const;
     bool contains(AstId id) const;
-    std::vector<Node> get_all(AstId id) const;
+    std::vector<Node *> get_all(AstId id, bool recursive = false);
 
     Node * get_last_node();
 

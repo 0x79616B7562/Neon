@@ -11,6 +11,24 @@ llvm::Value * build_expression(Node * node, Module * module, llvm::Type * _type)
     
         value = build_load(module, value, _type);
     }
+
+    auto fnum = node->get_node(AstId::FLOATING_NUMBER);
+    if (fnum) {
+        value = module->get_builder()->CreateAlloca(_type, nullptr, "");
+
+        module->get_builder()->CreateStore(create_constant(_type, fnum.value()->data.value(), module), value);
+
+        value = build_load(module, value, _type);
+    }
+
+    auto boolean = node->get_node(AstId::BOOLEAN);
+    if (boolean) {
+        value = module->get_builder()->CreateAlloca(_type, nullptr, "");
+
+        module->get_builder()->CreateStore(create_constant(_type, boolean.value()->data.value(), module), value);
+
+        value = build_load(module, value, _type);
+    }
     
     auto call = node->get_node(AstId::CALL);
     if (call) {

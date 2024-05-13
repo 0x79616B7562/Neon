@@ -11,7 +11,7 @@ llvm::Value * build_function(Node * node, Module * module) {
     std::vector<llvm::Type*> args;
 
     for (auto arg : node->get_all(AstId::ARGUMENT)) {
-        auto arg_type = string_to_type(arg.get_node(AstId::TYPE).value()->data.value(), module);
+        auto arg_type = string_to_type(arg->get_node(AstId::TYPE).value()->data.value(), module);
         args.push_back(arg_type);
     }
 
@@ -33,10 +33,10 @@ llvm::Value * build_function(Node * node, Module * module) {
     std::map<std::string, llvm::Value *> function_arguments;
     uint32_t index = 0;
     for (auto arg : node->get_all(AstId::ARGUMENT)) {
-        if (!arg.data.has_value())
+        if (!arg->data.has_value())
             throw std::invalid_argument("Argument node must have inner data");
 
-        function_arguments[arg.data.value()] = function->getArg(index);
+        function_arguments[arg->data.value()] = function->getArg(index);
 
         index++;
     }
@@ -63,6 +63,8 @@ llvm::Value * build_function(Node * node, Module * module) {
 }
 
 llvm::Value * build_function_end(Node * node, Module * module) {
+    auto _ = node;
+
     if (std::get<0>(module->get_function())->getName() == "main") {
         module->get_builder()->CreateRet(llvm::ConstantInt::get(llvm::Type::getInt32Ty(*module->context), 0));
     } else if (std::get<0>(module->get_function())->getReturnType() == llvm::Type::getVoidTy(*module->context)) {

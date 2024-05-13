@@ -44,6 +44,7 @@
 #include <llvm/Transforms/Scalar/ADCE.h>
 #include <llvm/Transforms/Scalar/SCCP.h>
 
+#include <numeric>
 #include <chrono>
 #include <stdio.h>
 #include <filesystem>
@@ -61,3 +62,5 @@
 #include <cstdint>
 #include <map>
 #include <algorithm>
+
+#define NPRINT std::cout << "NPRINT" << std::endl;
