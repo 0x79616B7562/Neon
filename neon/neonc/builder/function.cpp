@@ -20,7 +20,7 @@ llvm::Value * build_function(Node * node, Module * module) {
             _return_type.has_value() ? string_to_type(_return_type.value()->data.value(), module) : 
             llvm::Type::getVoidTy(*module->context),
         args,
-        false
+        node->has_any(AstId::VARIADIC)
     );
 
     auto function = llvm::Function::Create(

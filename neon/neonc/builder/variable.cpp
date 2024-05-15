@@ -19,6 +19,10 @@ llvm::Value * build_variable(Node * node, Module * module) {
     if (expr) {
         auto value = build_expression(expr.value(), module, __type);
 
+        if (value == nullptr) {
+            throw std::invalid_argument("build_expression is nullptr");
+        }
+
         module->get_builder()->CreateStore(value, alloca);
     } else {
         module->get_builder()->CreateStore(create_constant(__type, "", module), alloca);

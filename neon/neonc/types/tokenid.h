@@ -19,51 +19,35 @@ enum class TokenId {
     TRUE,
     FALSE,
 
-    COLON,
-    EQUALS,
-    COMMA,
-    SEMICOLON,
-    DOT,
+    COLON, //:
+    EQUALS, //=
+    COMMA, //,
+    SEMICOLON, //;
+    DOT, //.
 
-    ASTERISK,
-    PLUS,
-    MINUS,
-    SLASH,
-    PERCENT,
-    
-    EQUAL_TO,
-    NOT_EQUAL_TO,
-    GREATER_THAN,
-    LESS_THAN,
-    GREATER_THAN_OR_EQUAL_TO,
-    LESS_THAN_OR_EQUAL_TO,
-    
-    NOT,
-    AND,
-    OR,
-    
-    BITWISE_NOT,
-    BITWISE_AND,
-    BITWISE_OR,
-    BITWISE_XOR,
-    BITWISE_LEFT_SHIFT,
-    BITWISE_RIGHT_SHIFT,
-    
-    INCREMENT,
-    DECREMENT,
+    ASTERISK, //*
+    PLUS, //+
+    MINUS, //-
+    SLASH, ///
+    PERCENT, //%
 
-    LPAREN,
-    RPAREN,
+    EXCLAMATION, //!
+    AND, //&
+    OR, //|
+    GREATER_THAN, //>
+    LESS_THAN, //<
+    CIRC, //^
+    
+    LPAREN, //(
+    RPAREN, //)
 
-    LBRACE,
-    RBRACE,
+    LBRACE, //{
+    RBRACE, //}
 
     IDENT,
     FLOATING_NUMBER,
     NUMBER,
     STRING,
-
-    SINGLELINECOMMENT,
 };
 
 std::ostream & operator<<(std::ostream & os, const TokenId id);

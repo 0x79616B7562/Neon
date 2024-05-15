@@ -25,12 +25,12 @@ struct Node {
     Node * get_last_node();
 
     AstId id;
-    const std::optional<std::string> data;
+    std::optional<std::string> data;
     std::vector<Node> nodes;
 
-    // column --------------------------|
-    // line -----------------------\    |
-    const std::optional<std::tuple<int, int>> position;
+    // column --------------------|
+    // line -----------------\    |
+    std::optional<std::tuple<int, int>> position;
 
     //
     std::optional<llvm::Value * (*)(Node *, Module *)> build;

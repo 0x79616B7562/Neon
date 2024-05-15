@@ -16,6 +16,16 @@ llvm::Value * build_call(Node * node, Module * module) {
         auto expr = arg->get_node(AstId::EXPRESSION);
 
         if (expr) {
+            if (c > func->arg_size() - 1 && func->isVarArg()) { // variadic
+                std::cout << "VARIADIC FUNCTIONS ARE EXPERIMENTAL AND WORKS ONLY WITH I32" << std::endl;
+
+                auto value = build_expression(expr.value(), module, llvm::Type::getInt32Ty(*module->context));
+
+                args.push_back(value);
+
+                continue;
+            }
+
             auto arg = func->getArg(c);
 
             if (arg == nullptr) {

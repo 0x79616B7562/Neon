@@ -27,7 +27,6 @@ const std::vector<Token> Lexer::Tokenize(std::string _input) const {
     const auto IDENTIFIER = std::regex((char*)"^[a-zA-Z_]+[a-zA-Z0-9_]*$");
     const auto NUMBER = std::regex((char*)"^[-]?[0-9]+[0-9_]*$");
     const auto FLOATING_NUMBER = std::regex((char*)"^[-]?[0-9]+[0-9_]*[.][0-9_]+$");
-    const auto SINGLELINECOMMENT = std::regex((char*)"^\\/\\/[^\\n\\r]+$");
     const auto STRING = std::regex((char*)"^\"(?:\\\\.|[^\"\\\\])*\"$");
 
     for (long unsigned int i = 0; i < input.length(); i++) {
@@ -57,30 +56,14 @@ toks:
         else cmp("*",      TokenId::ASTERISK)
         else cmp("+",      TokenId::PLUS)
         else cmp("-",      TokenId::MINUS)
-        else if (buffer == "/") {
-            if (input[i + 1] != '/') { // exclude comment
-                add_token(tokens, TokenId::SLASH, buffer, line, column);
-                buffer.clear();
-            }
-        }
         else cmp("/",      TokenId::SLASH)
         else cmp("%",      TokenId::PERCENT)
-        // EQUAL_TO, ==
-        // NOT_EQUAL_TO, !=
-        // GREATER_THAN, >
-        // LESS_THAN, <
-        // GREATER_THAN_OR_EQUAL_TO, >=
-        // LESS_THAN_OR_EQUAL_TO, <=
-        // NOT, !
-        // AND, &&
-        // OR, ||
-        // BITWISE_AND, &
-        // BITWISE_OR, |
-        // BITWISE_XOR, ^
-        // BITWISE_LEFT_SHIFT, <<
-        // BITWISE_RIGHT_SHIFT, >>
-        // INCREMENT, ++
-        // DECREMENT, --
+        else cmp("!",      TokenId::EXCLAMATION)
+        else cmp("&",      TokenId::AND)
+        else cmp("|",      TokenId::OR)
+        else cmp(">",      TokenId::GREATER_THAN)
+        else cmp("<",      TokenId::LESS_THAN)
+        else cmp("^",      TokenId::CIRC)
         else cmp("\n",     TokenId::NEWLINE)
         else {
             if (buffer == "\"") {
@@ -114,10 +97,6 @@ toks:
                 add_token(tokens, TokenId::FLOATING_NUMBER, tmp, line, column);
                 buffer = buffer.back();
             
-                goto toks;
-            } else if (!std::regex_match(buffer, SINGLELINECOMMENT) && std::regex_match(tmp, SINGLELINECOMMENT)) {
-                buffer = buffer.back();
-
                 goto toks;
             }
         }

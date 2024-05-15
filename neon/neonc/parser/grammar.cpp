@@ -47,6 +47,57 @@ const std::optional<Token> expect(Pack * pack, const TokenId to_find, const std:
     return result;
 }
 
+void evaluate_expression(Node * node) {
+    return;
+
+    for (unsigned long int i = 2; i < node->nodes.size(); i += 2) {
+        auto & left = node->nodes[i - 2];
+        auto op = node->nodes[i - 1];
+        auto & right = node->nodes[i];
+
+        if (left.id == AstId::EXPRESSION) {
+            evaluate_expression(&left);
+        }
+
+        if (right.id == AstId::EXPRESSION) {
+            evaluate_expression(&right);
+        }
+
+        switch (op.id) {
+        case AstId::EXPRESSION:
+            break;
+        case AstId::OPERATOR_PLUS:
+        case AstId::OPERATOR_MINUS:
+        case AstId::OPERATOR_SLASH:
+        case AstId::OPERATOR_ASTERISK:
+        case AstId::OPERATOR_PERCENT:
+        case AstId::OPERATOR_B_AND:
+        case AstId::OPERATOR_B_OR:
+        case AstId::OPERATOR_B_XOR:
+        case AstId::OPERATOR_B_LEFT_SHIFT:
+        case AstId::OPERATOR_B_RIGHT_SHIFT:
+            break;
+        case AstId::OPERATOR_EQUAL:
+        case AstId::OPERATOR_NOT_EQUAL:
+        case AstId::OPERATOR_GREATER_THAN:
+        case AstId::OPERATOR_LESS_THAN:
+        case AstId::OPERATOR_GREATER_THAN_OR_EQUAL:
+        case AstId::OPERATOR_LESS_THAN_OR_EQUAL:
+            {
+                std::swap(left, right);
+            }
+            break;
+        case AstId::OPERATOR_NOT:
+        case AstId::OPERATOR_AND:
+        case AstId::OPERATOR_OR:
+            break;
+        default:
+            std::cout << op.id << std::endl;
+            throw std::invalid_argument("unknown id to evaluate");
+        }
+    }
+}
+
 //
 
 const std::optional<Token> parse_type(Pack * pack) {
@@ -161,8 +212,135 @@ bool parse_string(Pack * pack, Node * node) {
     return false;
 }
 
+bool parse_operator(Pack * pack, Node * node) {
+    // +
+    if (accept(pack, TokenId::PLUS, TokenId::NEWLINE)) {
+        node->nodes.push_back(Node(AstId::OPERATOR_PLUS, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+    // -
+    if (accept(pack, TokenId::MINUS, TokenId::NEWLINE)) {
+        node->nodes.push_back(Node(AstId::OPERATOR_MINUS, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+    // /
+    if (accept(pack, TokenId::SLASH, TokenId::NEWLINE)) {
+        node->nodes.push_back(Node(AstId::OPERATOR_SLASH, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+    // *
+    if (accept(pack, TokenId::ASTERISK, TokenId::NEWLINE)) {
+        node->nodes.push_back(Node(AstId::OPERATOR_ASTERISK, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+    // %
+    if (accept(pack, TokenId::PERCENT, TokenId::NEWLINE)) {
+        node->nodes.push_back(Node(AstId::OPERATOR_PERCENT, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+    // ==
+    if (accept(pack, TokenId::EQUALS, TokenId::NEWLINE)) {
+        expect(pack, TokenId::EQUALS, {}, "expected '='");
+
+        node->nodes.push_back(Node(AstId::OPERATOR_EQUAL, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+    // !
+    // !=
+    if (accept(pack, TokenId::EXCLAMATION, TokenId::NEWLINE)) {
+        if (accept(pack, TokenId::EQUALS, {})) {
+            node->nodes.push_back(Node(AstId::OPERATOR_NOT_EQUAL, {}, {{pack->get().line, pack->get().column}}));
+            return true;
+        }
+
+        node->nodes.push_back(Node(AstId::OPERATOR_NOT, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+    // >
+    // >=
+    // >>
+    if (accept(pack, TokenId::GREATER_THAN, TokenId::NEWLINE)) {
+        if (accept(pack, TokenId::EQUALS, {})) {
+            node->nodes.push_back(Node(AstId::OPERATOR_GREATER_THAN_OR_EQUAL, {}, {{pack->get().line, pack->get().column}}));
+            return true;
+        }
+
+        if (accept(pack, TokenId::GREATER_THAN, {})) {
+            node->nodes.push_back(Node(AstId::OPERATOR_B_RIGHT_SHIFT, {}, {{pack->get().line, pack->get().column}}));
+            return true;
+        }
+
+        node->nodes.push_back(Node(AstId::OPERATOR_GREATER_THAN, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+    // <
+    // <=
+    // <<
+    if (accept(pack, TokenId::LESS_THAN, TokenId::NEWLINE)) {
+        if (accept(pack, TokenId::EQUALS, {})) {
+            node->nodes.push_back(Node(AstId::OPERATOR_LESS_THAN_OR_EQUAL, {}, {{pack->get().line, pack->get().column}}));
+            return true;
+        }
+
+        if (accept(pack, TokenId::LESS_THAN, {})) {
+            node->nodes.push_back(Node(AstId::OPERATOR_B_LEFT_SHIFT, {}, {{pack->get().line, pack->get().column}}));
+            return true;
+        }
+
+        node->nodes.push_back(Node(AstId::OPERATOR_LESS_THAN, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+    // &
+    // &&
+    if (accept(pack, TokenId::AND, TokenId::NEWLINE)) {
+        if (accept(pack, TokenId::AND, {})) {
+            node->nodes.push_back(Node(AstId::OPERATOR_AND, {}, {{pack->get().line, pack->get().column}}));
+            return true;
+        }
+
+        node->nodes.push_back(Node(AstId::OPERATOR_B_AND, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+    // |
+    // ||
+    if (accept(pack, TokenId::OR, TokenId::NEWLINE)) {
+        if (accept(pack, TokenId::OR, {})) {
+            node->nodes.push_back(Node(AstId::OPERATOR_OR, {}, {{pack->get().line, pack->get().column}}));
+            return true;
+        }
+
+        node->nodes.push_back(Node(AstId::OPERATOR_B_OR, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+    // ^
+    if (accept(pack, TokenId::CIRC, TokenId::NEWLINE)) {
+        node->nodes.push_back(Node(AstId::OPERATOR_B_XOR, {}, {{pack->get().line, pack->get().column}}));
+        return true;
+    }
+
+    return false;
+}
+
 bool parse_expr(Pack * pack, Node * node) {
     auto expr = Node(AstId::EXPRESSION, {}, {});
+
+__parse_expr:
+    if (accept(pack, TokenId::LPAREN, TokenId::NEWLINE)) {
+        if (!parse_expr(pack, &expr))
+            return false;
+
+        expect(pack, TokenId::RPAREN, TokenId::NEWLINE, "expected ')'");
+
+        if (parse_operator(pack, &expr))
+            goto __parse_expr;
+        else {
+            evaluate_expression(&expr);
+
+            node->nodes.push_back(expr);
+
+            return true;
+        }
+    }
 
     if (!(
         parse_boolean(pack, &expr)
@@ -172,6 +350,11 @@ bool parse_expr(Pack * pack, Node * node) {
     )) {
         return false;
     }
+
+    if (parse_operator(pack, &expr))
+        goto __parse_expr;
+
+    evaluate_expression(&expr);
 
     node->nodes.push_back(expr);
 
@@ -263,6 +446,17 @@ bool parse_function_arguments(Pack * pack, Node * node) {
 
         expect(pack, TokenId::COLON, TokenId::NEWLINE, "expected ':'");
 
+        if (accept(pack, TokenId::DOT, TokenId::NEWLINE)) {
+            expect(pack, TokenId::DOT, {}, "expected '...'");
+            expect(pack, TokenId::DOT, {}, "expected '...'");
+
+            auto argument = Node(AstId::VARIADIC, ident->value, {{ident->line, ident->column}});
+
+            node->nodes.push_back(argument);
+
+            return true;
+        }
+
         auto _type = parse_type(pack);
 
         if (!_type) {
@@ -318,11 +512,11 @@ bool parse_function(Pack * pack, Node * node) {
     return true;
 }
 
-void parse(Pack * pack, Node * node) {
-    while (true) {
+void parse(Pack * pack, Node * node, bool iterate) {
+    while (iterate) {
         if (pack->get().token == TokenId::ENDOFFILE) {
             break;
-        } else if (accept(pack, TokenId::NEWLINE, {}) || accept(pack, TokenId::SINGLELINECOMMENT, {})) {
+        } else if (accept(pack, TokenId::NEWLINE, {})) {
             // ignore
         } else if (pack->get().token == TokenId::RBRACE) {
             break;
