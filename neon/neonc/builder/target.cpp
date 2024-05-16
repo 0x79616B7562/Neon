@@ -65,6 +65,7 @@ Target::Target() {
     pass->fpm->addPass(llvm::DCEPass());
     pass->fpm->addPass(llvm::ADCEPass());
     pass->fpm->addPass(llvm::SCCPPass());
+    pass->fpm->addPass(llvm::CorrelatedValuePropagationPass());
 
     pass->pb.registerModuleAnalyses(*pass->mam);
     pass->pb.registerFunctionAnalyses(*pass->fam);

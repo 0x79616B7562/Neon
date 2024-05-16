@@ -68,6 +68,7 @@ else()
         -Wno-error=unused-variable
         -Wno-error=reorder
         -Wno-reorder
+        -Wno-error=maybe-uninitialized
     )
 endif()
 

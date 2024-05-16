@@ -2,9 +2,9 @@
 
 #include "node.h"
 
-class Ast {
+class AbstractSyntaxTree {
 public:
-    Ast(Node root): root(root) {}
+    AbstractSyntaxTree(Node root): root(root) {}
 
     const std::string get_root_data() const;
     Node * get_root_ptr();

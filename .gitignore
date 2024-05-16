@@ -4,6 +4,12 @@ TODO*
 exec
 *.ll
 *.o
+/FlameGraph
+*.data
+*.folded
+*.perf
+*.svg
+*.old
 *.out
 *.so
 *.a

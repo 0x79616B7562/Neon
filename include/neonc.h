@@ -43,6 +43,8 @@
 #include <llvm/Transforms/Scalar/DCE.h>
 #include <llvm/Transforms/Scalar/ADCE.h>
 #include <llvm/Transforms/Scalar/SCCP.h>
+#include <llvm/Transforms/Scalar/CorrelatedValuePropagation.h>
+#include <llvm/Transforms/Scalar/LICM.h>
 
 #include <numeric>
 #include <chrono>

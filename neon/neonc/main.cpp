@@ -4,7 +4,6 @@
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 #include "builder/target.h"
-#include "analyzer/analyzer.h"
 #include <neonc.h>
 
 void build_bodies(Node * node, Module * module) {
@@ -52,9 +51,6 @@ void build(const std::string entry) {
     auto parser = Parser();
     auto ast = parser.parse_ast(file_path, tokens);
 
-    auto analyzer = Analyzer();
-    analyzer.analyze(&ast);
-
     ast.dump();
     std::cout << std::endl;
 
@@ -67,7 +63,7 @@ void build(const std::string entry) {
 
     build_ast(ast.get_root_ptr(), &module);
 
-    // target.optimize(&module);
+    target.optimize(&module);
     module.dump();
 
     target.module_to_object_file(module, file_path);

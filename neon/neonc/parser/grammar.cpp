@@ -3,6 +3,14 @@
 #define CHECK_NEWLINE_OR_SEMICOLON if (!accept(pack, TokenId::NEWLINE, {}).has_value()) { \
     if (!accept(pack, TokenId::SEMICOLON, {})) { throw_parse_error(pack, "expected new line or semicolon"); } }
 
+#define PRECEDENCE_SORT(ops) for (unsigned long int i = 2; i < expr.size(); i += 2) { \
+    auto & left = expr[i - 2]; auto & op = expr[i - 1]; auto & right = expr[i]; \
+    if (ops) { auto result = Node(AstId::EXPRESSION, {}, {}); \
+    result.nodes.push_back(left); result.nodes.push_back(op); result.nodes.push_back(right); \
+    expr[i - 2] = result; \
+    expr.erase(expr.begin() + i - 1, expr.begin() + i + 1); \
+    i -= 2; } }
+
 const std::optional<Token> accept(Pack * pack, const TokenId to_find, const std::optional<TokenId> ignore) {
     for (std::size_t i = pack->index; i < std::size(pack->tokens); i++) {
         Token tok = pack->tokens[i];
@@ -48,54 +56,27 @@ const std::optional<Token> expect(Pack * pack, const TokenId to_find, const std:
 }
 
 void evaluate_expression(Node * node) {
-    return;
+    std::vector<Node> & expr = node->nodes;
 
-    for (unsigned long int i = 2; i < node->nodes.size(); i += 2) {
-        auto & left = node->nodes[i - 2];
-        auto op = node->nodes[i - 1];
-        auto & right = node->nodes[i];
+    PRECEDENCE_SORT(op.id == AstId::OPERATOR_PERCENT || op.id == AstId::OPERATOR_SLASH || op.id == AstId::OPERATOR_ASTERISK);
+    PRECEDENCE_SORT(op.id == AstId::OPERATOR_PLUS || op.id == AstId::OPERATOR_MINUS);
+    
+    PRECEDENCE_SORT(
+        op.id == AstId::OPERATOR_EQUAL
+        || op.id == AstId::OPERATOR_NOT_EQUAL
+        || op.id == AstId::OPERATOR_GREATER_THAN
+        || op.id == AstId::OPERATOR_LESS_THAN
+        || op.id == AstId::OPERATOR_GREATER_THAN_OR_EQUAL
+        || op.id == AstId::OPERATOR_LESS_THAN_OR_EQUAL
+    );
 
-        if (left.id == AstId::EXPRESSION) {
-            evaluate_expression(&left);
-        }
-
-        if (right.id == AstId::EXPRESSION) {
-            evaluate_expression(&right);
-        }
-
-        switch (op.id) {
-        case AstId::EXPRESSION:
-            break;
-        case AstId::OPERATOR_PLUS:
-        case AstId::OPERATOR_MINUS:
-        case AstId::OPERATOR_SLASH:
-        case AstId::OPERATOR_ASTERISK:
-        case AstId::OPERATOR_PERCENT:
-        case AstId::OPERATOR_B_AND:
-        case AstId::OPERATOR_B_OR:
-        case AstId::OPERATOR_B_XOR:
-        case AstId::OPERATOR_B_LEFT_SHIFT:
-        case AstId::OPERATOR_B_RIGHT_SHIFT:
-            break;
-        case AstId::OPERATOR_EQUAL:
-        case AstId::OPERATOR_NOT_EQUAL:
-        case AstId::OPERATOR_GREATER_THAN:
-        case AstId::OPERATOR_LESS_THAN:
-        case AstId::OPERATOR_GREATER_THAN_OR_EQUAL:
-        case AstId::OPERATOR_LESS_THAN_OR_EQUAL:
-            {
-                std::swap(left, right);
-            }
-            break;
-        case AstId::OPERATOR_NOT:
-        case AstId::OPERATOR_AND:
-        case AstId::OPERATOR_OR:
-            break;
-        default:
-            std::cout << op.id << std::endl;
-            throw std::invalid_argument("unknown id to evaluate");
-        }
-    }
+    PRECEDENCE_SORT(op.id == AstId::OPERATOR_NOT);
+    PRECEDENCE_SORT(op.id == AstId::OPERATOR_B_LEFT_SHIFT || op.id == AstId::OPERATOR_B_RIGHT_SHIFT);
+    PRECEDENCE_SORT(op.id == AstId::OPERATOR_B_AND);
+    PRECEDENCE_SORT(op.id == AstId::OPERATOR_B_XOR);
+    PRECEDENCE_SORT(op.id == AstId::OPERATOR_B_OR);
+    PRECEDENCE_SORT(op.id == AstId::OPERATOR_AND);
+    PRECEDENCE_SORT(op.id == AstId::OPERATOR_OR);
 }
 
 //
@@ -512,24 +493,33 @@ bool parse_function(Pack * pack, Node * node) {
     return true;
 }
 
-void parse(Pack * pack, Node * node, bool iterate) {
-    while (iterate) {
-        if (pack->get().token == TokenId::ENDOFFILE) {
-            break;
-        } else if (accept(pack, TokenId::NEWLINE, {})) {
-            // ignore
-        } else if (pack->get().token == TokenId::RBRACE) {
-            break;
-        } else if (accept(pack, TokenId::FN, TokenId::NEWLINE)) {
-            if (!parse_function(pack, node)) break;
-        } else if (accept(pack, TokenId::LET, TokenId::NEWLINE)) {
-            if (!parse_variable(pack, node)) break;
-        } else if (accept(pack, TokenId::RET, TokenId::NEWLINE)) { 
-            if (!parse_return(pack, node)) break;
-        } else if (accept(pack, TokenId::IDENT, TokenId::NEWLINE)) {
-            if (!parse_ident(pack, node)) break;
-        } else {
-            throw_parse_error(pack, "unexpected");
-        }
+inline bool __parse(Pack * pack, Node * node) {
+    if (pack->get().token == TokenId::ENDOFFILE) {
+        return false;
+    } else if (accept(pack, TokenId::NEWLINE, {})) {
+        // ignore
+    } else if (pack->get().token == TokenId::RBRACE) {
+        return false;
+    } else if (accept(pack, TokenId::FN, TokenId::NEWLINE)) {
+        if (!parse_function(pack, node)) return false;
+    } else if (accept(pack, TokenId::LET, TokenId::NEWLINE)) {
+        if (!parse_variable(pack, node)) return false;
+    } else if (accept(pack, TokenId::RET, TokenId::NEWLINE)) { 
+        if (!parse_return(pack, node)) return false;
+    } else if (accept(pack, TokenId::IDENT, TokenId::NEWLINE)) {
+        if (!parse_ident(pack, node)) return false;
+    } else {
+        throw_parse_error(pack, "unexpected");
     }
+
+    return true;
+}
+
+void parse(Pack * pack, Node * node, bool iterate) {
+    if (iterate) {
+        while (true)
+            if (!__parse(pack, node))
+                break;
+    } else
+        __parse(pack, node);
 }

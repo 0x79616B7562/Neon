@@ -11,6 +11,6 @@ class Parser {
 public:
     Parser() = default;
 
-    const Ast parse_ast(const std::string file_name, std::vector<Token> tokens) const;
+    const AbstractSyntaxTree parse_ast(const std::string file_name, std::vector<Token> tokens) const;
 private:
 };
