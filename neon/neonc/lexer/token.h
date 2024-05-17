@@ -10,6 +10,6 @@ struct Token {
     const TokenId token;
     const std::string value;
 
-    const uint32_t line;
-    const uint32_t column;
+    const uint64_t line;
+    const uint64_t column;
 };

@@ -4,7 +4,12 @@
 #include "pass.h"
 
 struct Module {
-    Module(std::shared_ptr<llvm::LLVMContext> context, std::shared_ptr<llvm::Module> module): context(context), module(module) {}
+    Module(
+        std::shared_ptr<llvm::LLVMContext> context,
+        std::shared_ptr<llvm::Module> module,
+        std::string target_features,
+        std::string target_cpu
+    ): context(context), module(module), target_features(target_features), target_cpu(target_cpu) {}
 
     void dump() const;
     void clear();
@@ -15,6 +20,9 @@ struct Module {
 
     std::shared_ptr<llvm::LLVMContext> context;
     std::shared_ptr<llvm::Module> module;
+
+    std::string target_features;
+    std::string target_cpu;
 
     // argument -------------------------------------------------------------\
     //                                                                       |

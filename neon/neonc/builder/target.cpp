@@ -20,7 +20,7 @@ Target::Target() {
         return;
     }
 
-    auto cpu = "generic";
+    auto cpu = llvm::sys::getHostCPUName();
     auto features = "";
 
     llvm::TargetOptions opt;
@@ -35,6 +35,11 @@ Target::Target() {
     );
 
     target_machine = std::unique_ptr<llvm::TargetMachine>(tm);
+
+    target_features = target_machine->getTargetFeatureString();
+    target_cpu = target_machine->getTargetCPU();
+
+    //
 
     pass = std::make_shared<Pass>();
 
@@ -77,8 +82,10 @@ Module Target::create_module(const std::string module_name) const {
 
     llvm_module->setDataLayout(target_machine->createDataLayout());
     llvm_module->setTargetTriple(target_triple);
+    llvm_module->setUwtable(llvm::UWTableKind::Default);
+    llvm_module->setFramePointer(llvm::FramePointerKind::All);
 
-    return Module(context, llvm_module);
+    return Module(context, llvm_module, target_features, target_cpu);
 }
 
 void Target::dump_target_triple() const {
@@ -89,6 +96,10 @@ void Target::optimize(Module * module) const {
     for (auto t : module->functions) {
         pass->fpm->run(*std::get<0>(t.second), *pass->fam);
     }
+}
+
+std::string Target::get_target_features() const {
+    return target_features;
 }
 
 void Target::module_to_object_file(Module module, const std::string out) const {

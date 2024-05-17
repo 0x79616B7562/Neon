@@ -45,6 +45,15 @@ llvm::Value * build_function(Node * node, Module * module) {
     function->addFnAttr(llvm::Attribute::NoInline);
     function->addFnAttr(llvm::Attribute::OptimizeNone);
     function->addFnAttr(llvm::Attribute::NoUnwind);
+    function->addFnAttr("frame-pointer", "all");
+    function->addFnAttr("min-legal-vector-width", "0");
+    function->addFnAttr("no-trapping-math", "true");
+    function->addFnAttr("stack-protector-buffer-size", "8");
+    if (!module->target_cpu.empty())
+        function->addFnAttr("target-cpu", module->target_cpu);
+    if (!module->target_features.empty())
+        function->addFnAttr("target-features", module->target_features);
+    function->addFnAttr("tune-cpu", "generic");
 
     if (!node->contains(AstId::BODY)) {
         function->addParamAttr(0, llvm::Attribute::NoUndef);

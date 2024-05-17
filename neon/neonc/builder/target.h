@@ -15,7 +15,13 @@ public:
     void optimize(Module * module) const;
 
     std::shared_ptr<Pass> pass;
+
+    std::string get_target_features() const;
+    std::string get_target_cpu() const;
 private:
+    std::string target_features;
+    std::string target_cpu;
+
     std::shared_ptr<llvm::LLVMContext> context;
     std::string target_triple;
     const llvm::Target * target;

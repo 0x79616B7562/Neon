@@ -182,8 +182,6 @@ bool parse_string(Pack * pack, Node * node) {
 
     if (str) {
         std::string _str = str->value;
-        _str.erase(0, 1);
-        _str.erase(_str.size() - 1, 1);
 
         node->nodes.push_back(Node(AstId::STRING, _str, {{str->line, str->column}}));
 
