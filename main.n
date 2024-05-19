@@ -1,6 +1,4 @@
 fn printf(_: str, _: ...) i32;
 
-fn main() { 
-    let a: i32 = 5 + 3 * 8 - 4 / 2 % 3;
-    printf("variable a is: %d, and it supposed to be: 27\n", a);
+fn main() {
 }

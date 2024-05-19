@@ -17,7 +17,7 @@ const std::optional<Token> accept(Pack * pack, const TokenId to_find, const std:
 
         if (tok.token == to_find) {
             pack->index += i - pack->index + 1;
-            
+
             return tok;
         }
 
@@ -26,18 +26,6 @@ const std::optional<Token> accept(Pack * pack, const TokenId to_find, const std:
                 continue;
 
         return {};
-    }
-
-    return {};
-}
-
-const std::optional<Token> accept_any(Pack * pack, const std::vector<TokenId> to_find, const std::optional<TokenId> ignore) {
-    for (auto t : to_find) {
-        auto result = accept(pack, t, ignore);
-
-        if (result.has_value()) {
-            return result;
-        }
     }
 
     return {};

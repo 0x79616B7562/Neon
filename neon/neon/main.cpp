@@ -1,4 +1,4 @@
-#include "compiler.h"
+#include <neonc/compiler.h>
 
 auto main(int argc, char * argv[]) -> int {
     build(argv[1]);

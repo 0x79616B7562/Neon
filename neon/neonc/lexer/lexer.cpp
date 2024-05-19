@@ -2,12 +2,23 @@
 
 #define cmp(s, t) if (ident == s) return t;
 
+inline void throw_error(const std::string file_path, uint32_t line, uint32_t column, const char * value, const char * message) {
+    auto src = extract_from_file(file_path, line);
+
+    std::cout << ColorRed << BoldFont << "Error" << ColorCyan << " -> " << ColorReset << file_path << "\n";
+    std::cout << ColorCyan << line << " | " << ColorReset << src << "\n";
+    std::cout << ColorCyan << std::string(std::to_string(line).length(), ' ') << " |";
+
+    std::cout << ColorRed << std::string(column, ' ') << "^ " << message << ", found '" << value << "'" << ColorReset << "\n" << std::endl;
+
+    exit(0);
+}
 inline void add_token(std::vector<Token> & tokens, TokenId token, std::string value, uint64_t & line, uint64_t & column) {
     tokens.push_back(Token {
         token,
         value,
         line,
-        column - uint64_t(value.size()) + 1
+        column - uint64_t(value.size()) + 2
     });
 
     if (token == TokenId::NEWLINE) {
@@ -90,7 +101,7 @@ inline bool is_whitespace(char ch) {
     return ch == ' ' || ch == '\t';
 }
 
-const std::vector<Token> Lexer::Tokenize(std::string _input) const {
+const std::vector<Token> Lexer::Tokenize(const std::string file_path, std::string _input) const {
     std::vector<Token> tokens;
     std::string input = _input + " ";
     long long cursor = 0;
@@ -98,6 +109,8 @@ const std::vector<Token> Lexer::Tokenize(std::string _input) const {
 
     uint64_t line = 1, column = 0;
     bool in_string = false;
+    int32_t indentation = 0;
+    uint32_t last_l_brace_l = 0, last_l_brace_c = 0;
 
     long long __size = input.size();
     while (1) {
@@ -148,6 +161,19 @@ const std::vector<Token> Lexer::Tokenize(std::string _input) const {
             cursor--;
         } else if (is_single(input[cursor])) {
             add_token(tokens, resolve_single(input[cursor]), std::string(1, input[cursor]), line, column);
+
+            if (input[cursor] == '{') {
+                last_l_brace_l = line;
+                last_l_brace_c = column;
+
+                indentation++;
+            } else if (input[cursor] == '}') {
+                indentation--;
+
+                if (indentation < 0) {
+                    throw_error(file_path, line, column + 1, "}", "unexpected closing delimiter");
+                }
+            }
             
             column++;
 
@@ -179,6 +205,10 @@ in_string_block:
             cursor++;
             column++;
         }
+    }
+
+    if (indentation > 0) {
+        throw_error(file_path, last_l_brace_l, last_l_brace_c + 1, "{", "unclosed delimiter");
     }
 
     tokens.push_back(Token {

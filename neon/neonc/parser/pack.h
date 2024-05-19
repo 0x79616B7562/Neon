@@ -12,7 +12,7 @@ struct Pack {
     Token get_previous() const;
     bool is_at_end() const;
     Token next();
-    
+
     uint32_t index = 0;
     const std::vector<Token> tokens;
 };
