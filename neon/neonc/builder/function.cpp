@@ -23,6 +23,10 @@ llvm::Value * build_function(Node * node, Module * module) {
         node->has_any(AstId::VARIADIC)
     );
 
+    if (node->has_any(AstId::VARIADIC)) {
+        std::cout << ColorRed << "VARIADIC FUNCTIONS ARE EXPERIMENTAL AND ONLY WORKS WITH i32" << ColorReset << std::endl;
+    }
+
     auto function = llvm::Function::Create(
         func_type,
         llvm::Function::ExternalLinkage,

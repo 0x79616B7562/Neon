@@ -17,8 +17,6 @@ llvm::Value * build_call(Node * node, Module * module) {
 
         if (expr) {
             if (c > func->arg_size() - 1 && func->isVarArg()) { // variadic
-                std::cout << ColorRed << "VARIADIC FUNCTIONS ARE EXPERIMENTAL AND WORKS ONLY WITH I32" << ColorReset << std::endl;
- 
                 auto value = build_expression(expr.value(), module, llvm::Type::getInt32Ty(*module->context));
 
                 args.push_back(value);

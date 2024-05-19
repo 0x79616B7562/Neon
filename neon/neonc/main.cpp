@@ -45,13 +45,13 @@ void build(const std::string entry) {
 
     auto lexer = Lexer();
     auto tokens = lexer.Tokenize(file);
-    for (auto tok : tokens) tok.dump();
+    // for (auto tok : tokens) tok.dump();
     std::cout << std::endl;
 
     auto parser = Parser();
     auto ast = parser.parse_ast(file_path, tokens);
 
-    ast.dump();
+    // ast.dump();
     std::cout << std::endl;
 
     auto target = Target();
