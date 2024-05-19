@@ -13,6 +13,7 @@ inline void throw_error(const std::string file_path, uint32_t line, uint32_t col
 
     exit(0);
 }
+
 inline void add_token(std::vector<Token> & tokens, TokenId token, std::string value, uint64_t & line, uint64_t & column) {
     tokens.push_back(Token {
         token,
@@ -27,16 +28,16 @@ inline void add_token(std::vector<Token> & tokens, TokenId token, std::string va
     }
 }
 
-inline bool is_ident(char ch, bool include_nums = true) {
+constexpr inline bool is_ident(char ch, bool include_nums = true) {
     return include_nums ? (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_'
         : (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_';
 }
 
-inline bool is_number(char ch, bool include_underscore = true) {
+constexpr inline bool is_number(char ch, bool include_underscore = true) {
     return include_underscore ? (ch >= '0' && ch <= '9') || ch == '_' : ch >= '0' && ch <= '9';
 }
 
-inline TokenId resolve_ident(std::string ident) {
+constexpr inline TokenId resolve_ident(std::string ident) {
     cmp("fn", TokenId::FN)
     cmp("let", TokenId::LET)
     cmp("mut", TokenId::MUT)
@@ -47,7 +48,7 @@ inline TokenId resolve_ident(std::string ident) {
     return TokenId::IDENT;
 }
 
-inline bool is_single(char ch) {
+constexpr inline bool is_single(char ch) {
     return ch == '('
         || ch == ')'
         || ch == '{'
@@ -70,7 +71,7 @@ inline bool is_single(char ch) {
         || ch == '^';
 }
 
-inline TokenId resolve_single(char ch) {
+constexpr inline TokenId resolve_single(char ch) {
     switch (ch) {
     case '(': return TokenId::LPAREN;
     case ')': return TokenId::RPAREN;
@@ -97,7 +98,7 @@ inline TokenId resolve_single(char ch) {
     return TokenId::INVALID;
 }
 
-inline bool is_whitespace(char ch) {
+constexpr inline bool is_whitespace(char ch) {
     return ch == ' ' || ch == '\t';
 }
 

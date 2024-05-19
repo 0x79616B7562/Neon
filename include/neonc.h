@@ -21,6 +21,7 @@
 #include <llvm/IR/PassManager.h>
 
 #include <llvm/MC/TargetRegistry.h>
+#include <llvm/MC/MCSubtargetInfo.h>
 
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/TargetSelect.h>

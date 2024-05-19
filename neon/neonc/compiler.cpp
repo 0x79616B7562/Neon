@@ -1,5 +1,13 @@
 #include "compiler.h"
 
+#include "util/measure.h"
+#include "util/cwd.h"
+#include "util/read_file.h"
+#include "lexer/lexer.h"
+#include "parser/parser.h"
+#include "builder/target.h"
+#include <neonc.h>
+
 void build_bodies(Node * node, Module * module) {
     if (node->build.has_value())
         node->build.value()(node, module);
@@ -29,12 +37,12 @@ void build_ast(Node * node, Module * module) {
     }
 }
 
-void build(const std::string entry) {
+void build(const char * entry) {
     auto measure = Measure();
 
     auto cwd = get_cwd();
 
-    auto file_path = cwd + "/" + entry;
+    auto file_path = cwd + "/" + std::string(entry);
     auto file = read_file(file_path);
 
     auto lexer = Lexer();

@@ -14,7 +14,7 @@ add_definitions(
     -D__STDC_CONSTANT_MACROS
 )
 
-## VERSION OF LLVM
+### LLVM
 
 execute_process(COMMAND llvm-config --version OUTPUT_VARIABLE LLVM_VERSION)
 message("LLVM VERSION: " ${LLVM_VERSION})
@@ -26,13 +26,26 @@ if(${LLVM_VERSION_PASSED})
     message(FATAL_ERROR "LLVM VERSION REQUIRED: 17.0.1")
 endif()
 
-### NEONC
-
 execute_process(COMMAND llvm-config --includedir OUTPUT_VARIABLE LLVM_INCLUDE)
 execute_process(COMMAND llvm-config --libs all OUTPUT_VARIABLE LLVM_LIBRARIES)
 
 string(STRIP ${LLVM_INCLUDE} LLVM_INCLUDE)
 string(STRIP ${LLVM_LIBRARIES} LLVM_LIBRARIES)
+
+### NIR
+
+file(
+    GLOB
+    NIR_SRC_FILES
+    ${PROJECT_SOURCE_DIR}/neon/nir/*.cpp
+    ${PROJECT_SOURCE_DIR}/neon/nir/*/*.cpp
+)
+
+add_library(nir STATIC ${NIR_SRC_FILES})
+
+###
+
+### NEONC
 
 file(
     GLOB
@@ -41,12 +54,28 @@ file(
     ${PROJECT_SOURCE_DIR}/neon/neonc/*/*.cpp
 )
 
-add_executable(neonc ${NEONC_SRC_FILES})
+add_library(neonc STATIC ${NEONC_SRC_FILES})
 
-target_include_directories(neonc PRIVATE ${LLVM_INCLUDE} include)
+target_include_directories(neonc PRIVATE ${LLVM_INCLUDE} include neon)
 target_link_libraries(neonc ${LLVM_LIBRARIES})
 
 target_precompile_headers(neonc PRIVATE include/neonc.h)
+
+###
+
+### NEON
+
+file(
+    GLOB
+    NEON_SRC_FILES
+    ${PROJECT_SOURCE_DIR}/neon/neon/*.cpp
+    ${PROJECT_SOURCE_DIR}/neon/neon/*/*.cpp
+)
+
+add_executable(neon ${NEON_SRC_FILES})
+
+target_include_directories(neon PRIVATE neon)
+target_link_libraries(neon neonc)
 
 ###
 
