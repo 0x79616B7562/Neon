@@ -2,12 +2,14 @@
 
 #include <neonc.h>
 
-class Measure {
-private:
-    std::chrono::steady_clock::time_point time;
-public:
-    Measure();
+namespace neonc {
+    class Measure {
+    private:
+        std::chrono::steady_clock::time_point time;
+    public:
+        Measure();
 
-    void reset();
-    void finish(std::string msg) const;
-};
+        void reset();
+        void finish(std::string msg) const;
+    };
+}

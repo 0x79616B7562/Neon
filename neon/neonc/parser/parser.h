@@ -7,10 +7,12 @@
 #include "grammar.h"
 #include <neonc.h>
 
-class Parser {
-public:
-    Parser() = default;
+namespace neonc {
+    class Parser {
+    public:
+        Parser() = default;
 
-    const AbstractSyntaxTree parse_ast(const std::string file_name, std::vector<Token> tokens) const;
-private:
-};
+        const AbstractSyntaxTree parse_ast(const std::string file_name, std::vector<Token> tokens) const;
+    private:
+    };
+}

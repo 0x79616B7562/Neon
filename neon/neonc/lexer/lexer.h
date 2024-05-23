@@ -4,9 +4,11 @@
 #include "../util/extract_from_file.h"
 #include <neonc.h>
 
-class Lexer {
-public:
-    Lexer() = default;
+namespace neonc {
+    class Lexer {
+    public:
+        Lexer() = default;
 
-    const std::vector<Token> Tokenize(const std::string file_path, std::string input) const;
-};
+        const std::vector<Token> Tokenize(const std::string file_path, std::string input) const;
+    };
+}

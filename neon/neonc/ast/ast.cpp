@@ -1,13 +1,15 @@
 #include "ast.h"
 
-Node * AbstractSyntaxTree::get_root_ptr() {
-    return &root;
-}
+namespace neonc {
+    Node * AbstractSyntaxTree::get_root_ptr() {
+        return &root;
+    }
 
-const std::string AbstractSyntaxTree::get_root_data() const {
-    return root.data ? root.data.value() : "";
-}
+    const std::string AbstractSyntaxTree::get_root_data() const {
+        return root.data ? root.data.value() : "";
+    }
 
-void AbstractSyntaxTree::dump() const {
-    root.dump(0);
+    void AbstractSyntaxTree::dump() const {
+        root.dump(0);
+    }
 }

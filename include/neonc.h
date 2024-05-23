@@ -66,5 +66,4 @@
 #include <map>
 #include <algorithm>
 #include <utility>
-
-#define NPRINT std::cout << "NPRINT" << std::endl;
+#include <list>

@@ -2,4 +2,6 @@
 
 #include <neonc.h>
 
-std::string read_file(std::string file_path); 
+namespace neonc {
+    std::string read_file(std::string file_path);
+}

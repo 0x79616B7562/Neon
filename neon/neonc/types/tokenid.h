@@ -2,52 +2,54 @@
 
 #include <neonc.h>
 
-enum class TokenId {
-    ENDOFFILE,
+namespace neonc {
+    enum class TokenId {
+        ENDOFFILE,
 
-    INVALID,
+        INVALID,
 
-    WHITESPACE,
-    TAB,
-    NEWLINE,
+        WHITESPACE,
+        TAB,
+        NEWLINE,
 
-    LET,
-    MUT,
-    FN,
-    RET,
+        LET,
+        MUT,
+        FN,
+        RET,
 
-    TRUE,
-    FALSE,
+        TRUE,
+        FALSE,
 
-    COLON, //:
-    EQUALS, //=
-    COMMA, //,
-    SEMICOLON, //;
-    DOT, //.
+        COLON, //:
+        EQUALS, //=
+        COMMA, //,
+        SEMICOLON, //;
+        DOT, //.
 
-    ASTERISK, //*
-    PLUS, //+
-    MINUS, //-
-    SLASH, ///
-    PERCENT, //%
+        ASTERISK, //*
+        PLUS, //+
+        MINUS, //-
+        SLASH, ///
+        PERCENT, //%
 
-    EXCLAMATION, //!
-    AND, //&
-    OR, //|
-    GREATER_THAN, //>
-    LESS_THAN, //<
-    CIRC, //^
-    
-    LPAREN, //(
-    RPAREN, //)
+        EXCLAMATION, //!
+        AND, //&
+        OR, //|
+        GREATER_THAN, //>
+        LESS_THAN, //<
+        CIRC, //^
+        
+        LPAREN, //(
+        RPAREN, //)
 
-    LBRACE, //{
-    RBRACE, //}
+        LBRACE, //{
+        RBRACE, //}
 
-    IDENT,
-    FLOATING_NUMBER,
-    NUMBER,
-    STRING,
-};
+        IDENT,
+        FLOATING_NUMBER,
+        NUMBER,
+        STRING,
+    };
 
-std::ostream & operator<<(std::ostream & os, const TokenId id);
+    std::ostream & operator<<(std::ostream & os, const TokenId id);
+}

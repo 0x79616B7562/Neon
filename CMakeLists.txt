@@ -32,19 +32,6 @@ execute_process(COMMAND llvm-config --libs all OUTPUT_VARIABLE LLVM_LIBRARIES)
 string(STRIP ${LLVM_INCLUDE} LLVM_INCLUDE)
 string(STRIP ${LLVM_LIBRARIES} LLVM_LIBRARIES)
 
-### NIR
-
-file(
-    GLOB
-    NIR_SRC_FILES
-    ${PROJECT_SOURCE_DIR}/neon/nir/*.cpp
-    ${PROJECT_SOURCE_DIR}/neon/nir/*/*.cpp
-)
-
-add_library(nir STATIC ${NIR_SRC_FILES})
-
-###
-
 ### NEONC
 
 file(

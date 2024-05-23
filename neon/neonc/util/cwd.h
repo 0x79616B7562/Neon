@@ -10,5 +10,7 @@
     #define GetCurrentDir getcwd
 #endif
 
-const std::string get_cwd(); 
-const std::string get_root();
+namespace neonc {
+    const std::string get_cwd(); 
+    const std::string get_root();
+}

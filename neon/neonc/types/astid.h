@@ -2,50 +2,51 @@
 
 #include <neonc.h>
 
-enum class AstId {
-    NONE,
+namespace neonc {
+    enum class AstId {
+        NONE,
 
-    ROOT,
+        ROOT,
 
-    VARIABLE,
-    MUTABLE,
+        VARIABLE,
+        MUTABLE,
 
-    FUNCTION,
-    FUNCTION_END,
-    
-    BODY,
-    RETURN,
-    CALL,
+        FUNCTION,
+        
+        BODY,
+        RETURN,
+        CALL,
 
-    ARGUMENT,
-    VARIADIC,
-    TYPE,
-    EXPRESSION,
-    FLOATING_NUMBER,
-    NUMBER,
-    BOOLEAN,
-    STRING,
-    IDENTIFIER,
+        ARGUMENT,
+        VARIADIC,
+        TYPE,
+        EXPRESSION,
+        FLOATING_NUMBER,
+        NUMBER,
+        BOOLEAN,
+        STRING,
+        IDENTIFIER,
 
-    OPERATOR_PLUS, // +
-    OPERATOR_MINUS, // -
-    OPERATOR_SLASH, // /
-    OPERATOR_ASTERISK, // *
-    OPERATOR_PERCENT, // %
-    OPERATOR_EQUAL, // ==
-    OPERATOR_NOT_EQUAL, // !=
-    OPERATOR_GREATER_THAN, // >
-    OPERATOR_LESS_THAN, // <
-    OPERATOR_GREATER_THAN_OR_EQUAL, // >=
-    OPERATOR_LESS_THAN_OR_EQUAL, // <=
-    OPERATOR_NOT, // !
-    OPERATOR_AND, // &&
-    OPERATOR_B_AND, // &
-    OPERATOR_OR, // ||
-    OPERATOR_B_OR, // |
-    OPERATOR_B_XOR, // ^
-    OPERATOR_B_LEFT_SHIFT, // <<
-    OPERATOR_B_RIGHT_SHIFT, // >>
-};
+        OPERATOR_PLUS, // +
+        OPERATOR_MINUS, // -
+        OPERATOR_SLASH, // /
+        OPERATOR_ASTERISK, // *
+        OPERATOR_PERCENT, // %
+        OPERATOR_EQUAL, // ==
+        OPERATOR_NOT_EQUAL, // !=
+        OPERATOR_GREATER_THAN, // >
+        OPERATOR_LESS_THAN, // <
+        OPERATOR_GREATER_THAN_OR_EQUAL, // >=
+        OPERATOR_LESS_THAN_OR_EQUAL, // <=
+        OPERATOR_NOT, // !
+        OPERATOR_AND, // &&
+        OPERATOR_B_AND, // &
+        OPERATOR_OR, // ||
+        OPERATOR_B_OR, // |
+        OPERATOR_B_XOR, // ^
+        OPERATOR_B_LEFT_SHIFT, // <<
+        OPERATOR_B_RIGHT_SHIFT, // >>
+    };
 
-std::ostream & operator<<(std::ostream & os, const AstId id);
+    std::ostream & operator<<(std::ostream & os, const AstId id);
+}

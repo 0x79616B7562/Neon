@@ -1,3 +1,5 @@
 #pragma once
 
-void build(const char * entry);
+namespace neonc {
+    void build(const char * entry);
+}
