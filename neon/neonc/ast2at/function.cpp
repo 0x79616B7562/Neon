@@ -1,5 +1,8 @@
 #include "build.h"
 
+#include "../at/objects/argument.h"
+#include "../at/objects/function.h"
+
 namespace neonc {
     void build_function(Node * node, ActionTree * at) {
         if (!node->data.has_value()) {
@@ -18,12 +21,16 @@ namespace neonc {
             ));
         }
 
-        at->add_function(
+        auto func = at->get_insert_stack()->add_object<Function>(
             node->data.value(),
             node->has_any(AstId::BODY),
-            _type.has_value() ? _type.value()->data.value() : "void",
+            _type.has_value() ? _type.value()->data.value() : "",
             args,
-            node->has_any(AstId::VARIADIC) ? node->get_node(AstId::VARIADIC).value()->data : std::nullopt
+            node->has_any(AstId::VARIADIC) ? node->get_node(AstId::VARIADIC).value()->data : std::nullopt,
+            node->position
         );
+
+        if (node->has_any(AstId::BODY))
+            at->push_insert_stack(func);
     }
 }

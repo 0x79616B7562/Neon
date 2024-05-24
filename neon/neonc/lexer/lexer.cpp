@@ -20,7 +20,7 @@ namespace neonc {
             token,
             value,
             line,
-            column - uint64_t(value.size()) + 2
+            column - uint64_t(value.length()) + 1
         });
 
         if (token == TokenId::NEWLINE) {
@@ -174,6 +174,8 @@ namespace neonc {
 
                 cursor--;
             } else if (is_single(input[cursor])) {
+                column++;
+
                 add_token(tokens, resolve_single(input[cursor]), std::string(1, input[cursor]), line, column);
 
                 if (input[cursor] == '{') {
@@ -188,8 +190,6 @@ namespace neonc {
                         throw_error(file_path, line, column + 1, "}", "unexpected closing delimiter");
                     }
                 }
-                
-                column++;
 
                 buffer.clear();
             } else if (is_whitespace(input[cursor])) { // ignore

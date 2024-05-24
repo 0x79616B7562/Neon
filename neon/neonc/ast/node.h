@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../types/astid.h"
+#include "../types/position.h"
 #include "../util/clicolor.h"
 #include "../at/at.h"
 #include <neonc.h>
@@ -10,7 +11,7 @@ namespace neonc {
         Node(
             const AstId id,
             const std::optional<std::string> data,
-            const std::optional<std::tuple<int, int>> position,
+            const std::optional<Position> position,
             const std::optional<void (*)(Node *, ActionTree *)> build = std::nullopt
         ): id(id), data(data), position(position), build(build) {}
 
@@ -29,9 +30,7 @@ namespace neonc {
         std::optional<std::string> data;
         std::vector<Node> nodes;
 
-        // column --------------------|
-        // line -----------------\    |
-        std::optional<std::tuple<int, int>> position;
+        std::optional<Position> position;
 
         //
         std::optional<void (*)(Node *, ActionTree *)> build;

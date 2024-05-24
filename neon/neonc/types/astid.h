@@ -12,8 +12,10 @@ namespace neonc {
         MUTABLE,
 
         FUNCTION,
-        
+         
         BODY,
+        END,
+        
         RETURN,
         CALL,
 

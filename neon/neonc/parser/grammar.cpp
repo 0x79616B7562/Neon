@@ -366,7 +366,7 @@ namespace neonc {
         auto ident = expect(pack, TokenId::IDENT, TokenId::NEWLINE, "expected identifier");
 
         auto varnode = Node(AstId::VARIABLE, ident->value, {{pack->get_previous().line, pack->get_previous().column}}, build_variable);
-
+ 
         if (muttok)
             varnode.nodes.push_back(Node(AstId::MUTABLE, {}, {{muttok->line, muttok->column}}));
 
@@ -447,7 +447,7 @@ namespace neonc {
     bool parse_function(Pack * pack, Node * node) {
         auto ident = expect(pack, TokenId::IDENT, TokenId::NEWLINE, "expected identifier");
 
-        auto fnnode = Node(AstId::FUNCTION, ident->value, {{pack->get_previous().line, pack->get_previous().column}}, build_function);
+        auto fnnode = Node(AstId::FUNCTION, ident->value, {{pack->get_offset(-2).line, pack->get_offset(-2).column}}, build_function);
 
         expect(pack, TokenId::LPAREN, TokenId::NEWLINE, "expected '('");
 
@@ -474,6 +474,7 @@ namespace neonc {
 
         expect(pack, TokenId::RBRACE, TokenId::NEWLINE, "expected '}'");
 
+        fnnode.nodes.push_back(Node(AstId::END, {}, {}, build_end));
         node->nodes.push_back(fnnode);
 
         return true;

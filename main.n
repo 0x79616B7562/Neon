@@ -1,5 +1,5 @@
 fn printf(_: str, _: ...) i32;
 
 fn main() {
-    let a: i32 = 10.01
+    let mut a: i32 = 10
 }

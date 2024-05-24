@@ -11,10 +11,11 @@ namespace neonc {
     }
 
     Token Pack::get_previous() const {
-        if (tokens.size() <= 1)
-            return tokens[index];
-
         return tokens[index - 1];
+    }
+
+    Token Pack::get_offset(const int64_t offset) const {
+        return tokens[index + offset];
     }
 
     bool Pack::is_at_end() const {

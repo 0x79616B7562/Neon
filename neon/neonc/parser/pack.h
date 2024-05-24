@@ -11,6 +11,7 @@ namespace neonc {
         Token get() const;
         Token get_next() const;
         Token get_previous() const;
+        Token get_offset(const int64_t offset) const;
         bool is_at_end() const;
         Token next();
 

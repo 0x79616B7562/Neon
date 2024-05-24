@@ -1,24 +1,24 @@
 #include "at.h"
 
 namespace neonc {
+    ActionTree::ActionTree() {
+        root = std::make_shared<Root>();
+        push_insert_stack(root);
+    }
+
     void ActionTree::dump() const {
-        for (auto & func : functions)
-            func.dump();
+        root->dump(0);
+    }
+ 
+    void ActionTree::push_insert_stack(std::shared_ptr<Object> obj) {
+        insert_stack.push_back(obj);
     }
 
-    Function * ActionTree::add_function(
-        const std::string identifier,
-        const bool has_body,
-        const std::string type,
-        const std::vector<Argument> arguments,
-        const std::optional<std::string> variadic
-    ) {
-        functions.push_back(Function(identifier, has_body, type, arguments, variadic));
-
-        return &functions.back();
+    void ActionTree::pop_insert_stack() {
+        insert_stack.pop_back();
     }
-    
-    Function * ActionTree::get_last_function() {
-        return &functions.back();
+
+    std::shared_ptr<Object> ActionTree::get_insert_stack() {
+        return insert_stack.back();
     }
 }

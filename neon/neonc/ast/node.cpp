@@ -18,7 +18,7 @@ namespace neonc {
             std::cout << "\"" << data.value() << "\" ";
 
         if (position)
-            std::cout << "<" << std::get<0>(position.value()) << ":" << std::get<1>(position.value()) << "> ";
+            std::cout << "<" << position.value().line << ":" << position.value().column << "> ";
 
         if (build)
             std::cout << ColorRed << BoldFont << "B " << ColorReset;

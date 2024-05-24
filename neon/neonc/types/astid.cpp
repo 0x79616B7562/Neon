@@ -7,6 +7,7 @@ namespace neonc {
             case AstId::ROOT: return os << "Root";
             case AstId::VARIABLE: return os << "Variable";
             case AstId::FUNCTION: return os << "Function";
+            case AstId::END: return os << "End";
             case AstId::FLOATING_NUMBER: return os << "Floating_Number";
             case AstId::NUMBER: return os << "Number";
             case AstId::MUTABLE: return os << "Mutable";
