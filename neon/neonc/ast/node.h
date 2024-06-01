@@ -1,38 +1,51 @@
 #pragma once
 
-#include "../types/astid.h"
 #include "../types/position.h"
-#include "../util/clicolor.h"
-#include "../at/at.h"
 #include <neonc.h>
+#include "../util/clicolor.h"
+
+#define DEF_INDENT_MUL 4
 
 namespace neonc {
     struct Node {
-        Node(
-            const AstId id,
-            const std::optional<std::string> data,
-            const std::optional<Position> position,
-            const std::optional<void (*)(Node *, ActionTree *)> build = std::nullopt
-        ): id(id), data(data), position(position), build(build) {}
+        Node(const std::optional<Position> position): position(position) {}
+        virtual ~Node() = default;
 
-        void dump(const int indent) const;
+        virtual void dump(const uint32_t indent) const = 0;
 
-        void add_node(AstId id, const std::optional<std::string> data);
+        template<typename T, typename ... Args>
+        std::shared_ptr<T> add_node(Args ... args) {
+            nodes.push_back(std::make_shared<T>(args...));
+            
+            return std::dynamic_pointer_cast<T>(nodes.back());
+        }
 
-        std::optional<Node *> get_node(AstId id);
-        bool has_any(AstId id) const;
-        bool contains(AstId id) const;
-        std::vector<Node *> get_all(AstId id, bool recursive = false);
+        void add_node(std::shared_ptr<Node> node) {
+            nodes.push_back(node);
+        }
 
-        Node * get_last_node();
-
-        AstId id;
-        std::optional<std::string> data;
-        std::vector<Node> nodes;
+        std::vector<std::shared_ptr<Node>> nodes;
 
         std::optional<Position> position;
-
-        //
-        std::optional<void (*)(Node *, ActionTree *)> build;
     };
+
+    namespace cli {
+        constexpr const std::string colorize(const std::string input, const uint32_t indentation) {
+            constexpr uint8_t len = 5;
+
+            constexpr char * array[len] = {
+                (char *)ColorCyan,
+                (char *)ColorYellow,
+                (char *)ColorBlue,
+                (char *)ColorGreen,
+                (char *)ColorMagenta,
+            };
+
+            return array[indentation % len] + input + ColorReset;
+        }
+
+        constexpr const std::string indent(const uint32_t indentation) {
+            return std::string(indentation * DEF_INDENT_MUL, ' ');
+        }
+    }
 }

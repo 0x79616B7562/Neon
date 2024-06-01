@@ -20,10 +20,10 @@ execute_process(COMMAND llvm-config --version OUTPUT_VARIABLE LLVM_VERSION)
 message("LLVM VERSION: " ${LLVM_VERSION})
 string(STRIP ${LLVM_VERSION} LLVM_VERSION)
 
-string(COMPARE NOTEQUAL ${LLVM_VERSION} "18.1.1" LLVM_VERSION_PASSED)
+string(COMPARE NOTEQUAL ${LLVM_VERSION} "18.1.6" LLVM_VERSION_PASSED)
 
 if(${LLVM_VERSION_PASSED})
-    message(FATAL_ERROR "LLVM VERSION REQUIRED: 18.1.1")
+    message(FATAL_ERROR "LLVM VERSION REQUIRED: 18.1.6")
 endif()
 
 execute_process(COMMAND llvm-config --includedir OUTPUT_VARIABLE LLVM_INCLUDE)
@@ -41,6 +41,7 @@ file(
     NEONC_SRC_FILES
     ${PROJECT_SOURCE_DIR}/neon/neonc/*.cpp
     ${PROJECT_SOURCE_DIR}/neon/neonc/*/*.cpp
+    ${PROJECT_SOURCE_DIR}/neon/neonc/*/*/*.cpp
 )
 
 add_library(neonc STATIC ${NEONC_SRC_FILES})

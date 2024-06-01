@@ -3,21 +3,21 @@
 #define CHECK_NEWLINE_OR_SEMICOLON if (!accept(pack, TokenId::NEWLINE, {}).has_value()) { \
     if (!accept(pack, TokenId::SEMICOLON, {})) { throw_parse_error(pack, "expected new line or semicolon"); } }
 
-#define PRECEDENCE_SORT(ops) for (unsigned long int i = 2; i < expr.size(); i += 2) { \
-    auto & left = expr[i - 2]; auto & op = expr[i - 1]; auto & right = expr[i]; \
-    if (ops) { auto result = Node(AstId::EXPRESSION, {}, {}); \
-    result.nodes.push_back(left); result.nodes.push_back(op); result.nodes.push_back(right); \
-    expr[i - 2] = result; \
-    expr.erase(expr.begin() + i - 1, expr.begin() + i + 1); \
+#define PRECEDENCE_SORT(ops) for (unsigned long int i = 2; i < nodes.size(); i += 2) { \
+    auto & left = nodes[i - 2]; std::shared_ptr<Operator> op = std::dynamic_pointer_cast<Operator>(nodes[i - 1]); auto & right = nodes[i]; \
+    if (ops) { auto result = std::make_shared<Expression>(); \
+    result->nodes.push_back(left); result->nodes.push_back(op); result->nodes.push_back(right); \
+    nodes[i - 2] = result; nodes.erase(nodes.begin() + i - 1, nodes.begin() + i + 1); \
     i -= 2; } }
 
 namespace neonc {
-    const std::optional<Token> accept(Pack * pack, const TokenId to_find, const std::optional<TokenId> ignore) {
+    const std::optional<Token> accept(Pack * pack, const TokenId to_find, const std::optional<TokenId> ignore, bool progress = true) {
         for (std::size_t i = pack->index; i < std::size(pack->tokens); i++) {
             Token tok = pack->tokens[i];
 
             if (tok.token == to_find) {
-                pack->index += i - pack->index + 1;
+                if (progress)
+                    pack->index += i - pack->index + 1;
 
                 return tok;
             }
@@ -32,8 +32,8 @@ namespace neonc {
         return {};
     }
 
-    const std::optional<Token> expect(Pack * pack, const TokenId to_find, const std::optional<TokenId> ignore, const char * message) {
-        auto result = accept(pack, to_find, ignore);
+    const std::optional<Token> expect(Pack * pack, const TokenId to_find, const std::optional<TokenId> ignore, const char * message, bool progress = true) {
+        auto result = accept(pack, to_find, ignore, progress);
 
         if (!result.has_value()) {
             throw_parse_error(pack, message);
@@ -45,27 +45,27 @@ namespace neonc {
     }
 
     void evaluate_expression(Node * node) {
-        std::vector<Node> & expr = node->nodes;
+        std::vector<std::shared_ptr<Node>> & nodes = node->nodes;
 
-        PRECEDENCE_SORT(op.id == AstId::OPERATOR_PERCENT || op.id == AstId::OPERATOR_SLASH || op.id == AstId::OPERATOR_ASTERISK);
-        PRECEDENCE_SORT(op.id == AstId::OPERATOR_PLUS || op.id == AstId::OPERATOR_MINUS);
-        
+        PRECEDENCE_SORT(op->op == op::Operator::PERCENT || op->op == op::Operator::SLASH || op->op == op::Operator::ASTERISK);
+        PRECEDENCE_SORT(op->op == op::Operator::PLUS || op->op == op::Operator::MINUS);
+
         PRECEDENCE_SORT(
-            op.id == AstId::OPERATOR_EQUAL
-            || op.id == AstId::OPERATOR_NOT_EQUAL
-            || op.id == AstId::OPERATOR_GREATER_THAN
-            || op.id == AstId::OPERATOR_LESS_THAN
-            || op.id == AstId::OPERATOR_GREATER_THAN_OR_EQUAL
-            || op.id == AstId::OPERATOR_LESS_THAN_OR_EQUAL
+            op->op == op::Operator::EQUAL
+            || op->op == op::Operator::NOT_EQUAL
+            || op->op == op::Operator::GREATER_THAN
+            || op->op == op::Operator::LESS_THAN
+            || op->op == op::Operator::GREATER_THAN_OR_EQUAL
+            || op->op == op::Operator::LESS_THAN_OR_EQUAL
         );
 
-        PRECEDENCE_SORT(op.id == AstId::OPERATOR_NOT);
-        PRECEDENCE_SORT(op.id == AstId::OPERATOR_B_LEFT_SHIFT || op.id == AstId::OPERATOR_B_RIGHT_SHIFT);
-        PRECEDENCE_SORT(op.id == AstId::OPERATOR_B_AND);
-        PRECEDENCE_SORT(op.id == AstId::OPERATOR_B_XOR);
-        PRECEDENCE_SORT(op.id == AstId::OPERATOR_B_OR);
-        PRECEDENCE_SORT(op.id == AstId::OPERATOR_AND);
-        PRECEDENCE_SORT(op.id == AstId::OPERATOR_OR);
+        PRECEDENCE_SORT(op->op == op::Operator::NOT);
+        PRECEDENCE_SORT(op->op == op::Operator::B_LEFT_SHIFT || op->op == op::Operator::B_RIGHT_SHIFT);
+        PRECEDENCE_SORT(op->op == op::Operator::B_AND);
+        PRECEDENCE_SORT(op->op == op::Operator::B_XOR);
+        PRECEDENCE_SORT(op->op == op::Operator::B_OR);
+        PRECEDENCE_SORT(op->op == op::Operator::AND);
+        PRECEDENCE_SORT(op->op == op::Operator::OR);
     }
 
     //
@@ -87,30 +87,15 @@ namespace neonc {
         return Token {
             .token = TokenId::IDENT,
             .value = __type,
-            .line = _type->line,
-            .column = _type->column,
+            .position = _type->position
         };
-    }
-
-    bool parse_arguments(Pack * pack, Node * node) {
-        while (true) {
-            auto argument = Node(AstId::ARGUMENT, {}, {});
-
-            if (!parse_expr(pack, &argument)) break;
-
-            node->nodes.push_back(argument);
-            
-            if (!accept(pack, TokenId::COMMA, TokenId::NEWLINE)) break;
-        }
-
-        return true;
     }
 
     bool parse_number(Pack * pack, Node * node) {
         auto num = accept(pack, TokenId::NUMBER, TokenId::NEWLINE);
 
         if (num) {
-            node->nodes.push_back(Node(AstId::NUMBER, num->value, {{num->line, num->column}}));
+            node->add_node<Number>(num->value, false, num->position);
 
             return true;
         }
@@ -118,8 +103,8 @@ namespace neonc {
         auto fnum = accept(pack, TokenId::FLOATING_NUMBER, TokenId::NEWLINE);
 
         if (fnum) {
-            node->nodes.push_back(Node(AstId::FLOATING_NUMBER, fnum->value, {{fnum->line, fnum->column}}));
-
+            node->add_node<Number>(fnum->value, true, fnum->position);
+            
             return true;
         }
 
@@ -128,16 +113,17 @@ namespace neonc {
 
     bool parse_boolean(Pack * pack, Node * node) {
         auto _true = accept(pack, TokenId::TRUE, TokenId::NEWLINE);
-        auto _false = accept(pack, TokenId::FALSE, TokenId::NEWLINE);
 
         if (_true) {
-            node->nodes.push_back(Node(AstId::BOOLEAN, "1", {{_true->line, _true->column}}));
+            node->add_node<Boolean>(true, _true->position);
 
             return true;
         }
 
+        auto _false = accept(pack, TokenId::FALSE, TokenId::NEWLINE);
+        
         if (_false) {
-            node->nodes.push_back(Node(AstId::BOOLEAN, "0", {{_false->line, _false->column}}));
+            node->add_node<Boolean>(false, _false->position);
 
             return true;
         }
@@ -145,22 +131,27 @@ namespace neonc {
         return false;
     }
 
-    bool parse_ident_in_expr(Pack * pack, Node * node) {
+    bool parse_ident(Pack * pack, Node * node) {
         auto ident = accept(pack, TokenId::IDENT, TokenId::NEWLINE);
 
         if (!ident)
             return false;
 
-        if (accept(pack, TokenId::LPAREN, TokenId::NEWLINE)) {
-            auto call = Node(AstId::CALL, ident->value, {{ident->line, ident->column}});
 
-            parse_arguments(pack, &call);
+        if (accept(pack, TokenId::LPAREN, TokenId::NEWLINE)) {
+            auto call = node->add_node<Call>(ident->value, ident->position);
+
+            while (true) {
+                if (!parse_expression(pack, call.get()))
+                    break;
+
+                if (!accept(pack, TokenId::COMMA, TokenId::NEWLINE))
+                    break;
+            }
 
             expect(pack, TokenId::RPAREN, TokenId::NEWLINE, "expected ')'");
-
-            node->nodes.push_back(call);
         } else {
-            node->nodes.push_back(Node(AstId::IDENTIFIER, ident->value, {{ident->line, ident->column}}));
+            node->add_node<Identifier>(ident->value, ident->position);
         }
 
         return true;
@@ -172,7 +163,7 @@ namespace neonc {
         if (str) {
             std::string _str = str->value;
 
-            node->nodes.push_back(Node(AstId::STRING, _str, {{str->line, str->column}}));
+            node->add_node<String>(str->value, str->position);
 
             return true;
         }
@@ -183,45 +174,45 @@ namespace neonc {
     bool parse_operator(Pack * pack, Node * node) {
         // +
         if (accept(pack, TokenId::PLUS, TokenId::NEWLINE)) {
-            node->nodes.push_back(Node(AstId::OPERATOR_PLUS, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::PLUS);
             return true;
         }
         // -
         if (accept(pack, TokenId::MINUS, TokenId::NEWLINE)) {
-            node->nodes.push_back(Node(AstId::OPERATOR_MINUS, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::MINUS);
             return true;
         }
         // /
         if (accept(pack, TokenId::SLASH, TokenId::NEWLINE)) {
-            node->nodes.push_back(Node(AstId::OPERATOR_SLASH, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::SLASH);
             return true;
         }
         // *
         if (accept(pack, TokenId::ASTERISK, TokenId::NEWLINE)) {
-            node->nodes.push_back(Node(AstId::OPERATOR_ASTERISK, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::ASTERISK);
             return true;
         }
         // %
         if (accept(pack, TokenId::PERCENT, TokenId::NEWLINE)) {
-            node->nodes.push_back(Node(AstId::OPERATOR_PERCENT, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::PERCENT);
             return true;
         }
         // ==
         if (accept(pack, TokenId::EQUALS, TokenId::NEWLINE)) {
             expect(pack, TokenId::EQUALS, {}, "expected '='");
 
-            node->nodes.push_back(Node(AstId::OPERATOR_EQUAL, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::EQUAL);
             return true;
         }
         // !
         // !=
         if (accept(pack, TokenId::EXCLAMATION, TokenId::NEWLINE)) {
             if (accept(pack, TokenId::EQUALS, {})) {
-                node->nodes.push_back(Node(AstId::OPERATOR_NOT_EQUAL, {}, {{pack->get().line, pack->get().column}}));
+                node->add_node<Operator>(op::Operator::NOT_EQUAL);
                 return true;
             }
 
-            node->nodes.push_back(Node(AstId::OPERATOR_NOT, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::NOT);
             return true;
         }
         // >
@@ -229,16 +220,16 @@ namespace neonc {
         // >>
         if (accept(pack, TokenId::GREATER_THAN, TokenId::NEWLINE)) {
             if (accept(pack, TokenId::EQUALS, {})) {
-                node->nodes.push_back(Node(AstId::OPERATOR_GREATER_THAN_OR_EQUAL, {}, {{pack->get().line, pack->get().column}}));
+                node->add_node<Operator>(op::Operator::GREATER_THAN_OR_EQUAL);
                 return true;
             }
 
             if (accept(pack, TokenId::GREATER_THAN, {})) {
-                node->nodes.push_back(Node(AstId::OPERATOR_B_RIGHT_SHIFT, {}, {{pack->get().line, pack->get().column}}));
+                node->add_node<Operator>(op::Operator::B_RIGHT_SHIFT);
                 return true;
             }
 
-            node->nodes.push_back(Node(AstId::OPERATOR_GREATER_THAN, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::GREATER_THAN);
             return true;
         }
         // <
@@ -246,115 +237,93 @@ namespace neonc {
         // <<
         if (accept(pack, TokenId::LESS_THAN, TokenId::NEWLINE)) {
             if (accept(pack, TokenId::EQUALS, {})) {
-                node->nodes.push_back(Node(AstId::OPERATOR_LESS_THAN_OR_EQUAL, {}, {{pack->get().line, pack->get().column}}));
+                node->add_node<Operator>(op::Operator::LESS_THAN_OR_EQUAL);
                 return true;
             }
 
             if (accept(pack, TokenId::LESS_THAN, {})) {
-                node->nodes.push_back(Node(AstId::OPERATOR_B_LEFT_SHIFT, {}, {{pack->get().line, pack->get().column}}));
+                node->add_node<Operator>(op::Operator::B_LEFT_SHIFT);
                 return true;
             }
 
-            node->nodes.push_back(Node(AstId::OPERATOR_LESS_THAN, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::LESS_THAN);
             return true;
         }
         // &
         // &&
         if (accept(pack, TokenId::AND, TokenId::NEWLINE)) {
             if (accept(pack, TokenId::AND, {})) {
-                node->nodes.push_back(Node(AstId::OPERATOR_AND, {}, {{pack->get().line, pack->get().column}}));
+                node->add_node<Operator>(op::Operator::AND);
                 return true;
             }
 
-            node->nodes.push_back(Node(AstId::OPERATOR_B_AND, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::B_AND);
             return true;
         }
         // |
         // ||
         if (accept(pack, TokenId::OR, TokenId::NEWLINE)) {
             if (accept(pack, TokenId::OR, {})) {
-                node->nodes.push_back(Node(AstId::OPERATOR_OR, {}, {{pack->get().line, pack->get().column}}));
+                node->add_node<Operator>(op::Operator::OR);
                 return true;
             }
 
-            node->nodes.push_back(Node(AstId::OPERATOR_B_OR, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::B_OR);
             return true;
         }
         // ^
         if (accept(pack, TokenId::CIRC, TokenId::NEWLINE)) {
-            node->nodes.push_back(Node(AstId::OPERATOR_B_XOR, {}, {{pack->get().line, pack->get().column}}));
+            node->add_node<Operator>(op::Operator::B_XOR);
             return true;
         }
 
         return false;
     }
 
-    bool parse_expr(Pack * pack, Node * node) {
-        auto expr = Node(AstId::EXPRESSION, {}, {});
+    bool parse_expression(Pack * pack, Node * node) {
+        auto expr = std::make_shared<Expression>();
 
     __parse_expr:
         if (accept(pack, TokenId::LPAREN, TokenId::NEWLINE)) {
-            if (!parse_expr(pack, &expr))
+            if (!parse_expression(pack, expr.get()))
                 return false;
 
             expect(pack, TokenId::RPAREN, TokenId::NEWLINE, "expected ')'");
 
-            if (parse_operator(pack, &expr))
+            if (parse_operator(pack, expr.get()))
                 goto __parse_expr;
             else {
-                evaluate_expression(&expr);
+                evaluate_expression(expr.get());
 
-                node->nodes.push_back(expr);
+                node->add_node(expr);
 
                 return true;
             }
         }
 
         if (!(
-            parse_boolean(pack, &expr)
-            || parse_number(pack, &expr)
-            || parse_ident_in_expr(pack, &expr)
-            || parse_string(pack, &expr)
+            parse_boolean(pack, expr.get())
+            || parse_number(pack, expr.get())
+            || parse_ident(pack, expr.get())
+            || parse_string(pack, expr.get())
         )) {
             return false;
         }
 
-        if (parse_operator(pack, &expr))
+        if (parse_operator(pack, expr.get()))
             goto __parse_expr;
 
-        evaluate_expression(&expr);
+        evaluate_expression(expr.get());
 
-        node->nodes.push_back(expr);
+        node->add_node(expr);
 
         return true;
     }
 
     bool parse_return(Pack * pack, Node * node) {
-        auto retnode = Node(AstId::RETURN, std::nullopt, {{pack->get_previous().line, pack->get_previous().column}}, build_return);
+        auto ret = node->add_node<Return>(accept(pack, TokenId::RET, TokenId::NEWLINE)->position);
 
-        parse_expr(pack, &retnode);
-
-        CHECK_NEWLINE_OR_SEMICOLON;
-
-        node->nodes.push_back(retnode);
-
-        return true;
-    }
-
-    bool parse_ident(Pack * pack, Node * node) {
-        auto ident = pack->get_previous();
-
-        if (accept(pack, TokenId::LPAREN, TokenId::NEWLINE)) {
-            auto call = Node(AstId::CALL, ident.value, {{ident.line, ident.column}}, build_call);
-
-            parse_arguments(pack, &call);
-
-            expect(pack, TokenId::RPAREN, TokenId::NEWLINE, "expected ')'");
-
-            node->nodes.push_back(call);
-        } else {
-            return false;
-        }
+        parse_expression(pack, ret.get());
 
         CHECK_NEWLINE_OR_SEMICOLON;
 
@@ -362,13 +331,9 @@ namespace neonc {
     }
 
     bool parse_variable(Pack * pack, Node * node) {
-        auto muttok = accept(pack, TokenId::MUT, TokenId::NEWLINE);
+        auto let = expect(pack, TokenId::LET, TokenId::NEWLINE, "expected 'let'");
+        auto mut = accept(pack, TokenId::MUT, TokenId::NEWLINE);
         auto ident = expect(pack, TokenId::IDENT, TokenId::NEWLINE, "expected identifier");
-
-        auto varnode = Node(AstId::VARIABLE, ident->value, {{pack->get_previous().line, pack->get_previous().column}}, build_variable);
- 
-        if (muttok)
-            varnode.nodes.push_back(Node(AstId::MUTABLE, {}, {{muttok->line, muttok->column}}));
 
         if (accept(pack, TokenId::COLON, TokenId::NEWLINE)) {
             auto _type = parse_type(pack);
@@ -379,103 +344,94 @@ namespace neonc {
                 return false;
             }
 
-            varnode.nodes.push_back(Node(AstId::TYPE, _type->value, {{_type->line, _type->column}}));
+            auto var = node->add_node<Variable>(ident->value, _type->value, let->position);
 
             if (accept(pack, TokenId::EQUALS, TokenId::NEWLINE)) {
-                if (!parse_expr(pack, &varnode)) {
+                if (!parse_expression(pack, var.get())) {
                     throw_parse_error(pack, "expected expression");
 
                     return false;
                 }
             }
         } else {
-            expect(pack, TokenId::EQUALS, TokenId::NEWLINE, "expected '='");
-            
-            if (!parse_expr(pack, &varnode)) {
+            expect(pack, TokenId::EQUALS, TokenId::NEWLINE, "expected ':' or '='");
+
+            auto var = node->add_node<Variable>(ident->value, std::nullopt, let->position);
+
+            if (!parse_expression(pack, var.get())) {
                 throw_parse_error(pack, "expected expression");
 
                 return false;
             }
         }
 
-        
-        CHECK_NEWLINE_OR_SEMICOLON;
+        return true;
+    }
 
-        node->nodes.push_back(varnode);
+    bool parse_function_arguments(Pack * pack, std::shared_ptr<Function> func) {
+        std::vector<Argument> args;
+
+        while (true) {
+            auto ident = accept(pack, TokenId::IDENT, TokenId::NEWLINE);
+
+            if (!ident)
+                break;
+
+            if (accept(pack, TokenId::COLON, TokenId::NEWLINE, "expected ':'")) {
+                auto _type = parse_type(pack);
+
+                if (!_type) {
+                    throw_parse_error(pack, "expected type");
+                
+                    return false;
+                }
+
+                args.push_back(Argument(ident->value, _type->value, ident->position));
+            } else {
+                args.push_back(Argument(ident->value, std::nullopt, ident->position));
+            }
+
+            if (!accept(pack, TokenId::COMMA, TokenId::NEWLINE))
+                break;
+        }
+
+        for (int32_t i = args.size(); i >= 0; i--) {
+            if (i == int32_t(args.size()) - 1 && !args[i].get_type().has_value()) {
+                throw_parse_error_at_position(pack, args[i].get_position().value(), "argument has no type");
+            } else if (i < int32_t(args.size())) {
+                if (!args[i].get_type()) {
+                    args[i].set_type(args[i + 1].get_type());
+                }
+            }
+        }
+
+        func->add_arguments(args);
 
         return true;
     }
 
-    bool parse_function_arguments(Pack * pack, Node * node) {
-        while (true) {
-            auto ident = accept(pack, TokenId::IDENT, TokenId::NEWLINE);
-
-            if (!ident) break;
-
-            expect(pack, TokenId::COLON, TokenId::NEWLINE, "expected ':'");
-
-            if (accept(pack, TokenId::DOT, TokenId::NEWLINE)) {
-                expect(pack, TokenId::DOT, {}, "expected '...'");
-                expect(pack, TokenId::DOT, {}, "expected '...'");
-
-                auto argument = Node(AstId::VARIADIC, ident->value, {{ident->line, ident->column}});
-
-                node->nodes.push_back(argument);
-
-                return true;
-            }
-
-            auto _type = parse_type(pack);
-
-            if (!_type) {
-                throw_parse_error(pack, "expected type");
-
-                return false;
-            }
-
-            auto argument = Node(AstId::ARGUMENT, ident->value, {{ident->line, ident->column}});
-            argument.nodes.push_back(Node(AstId::TYPE, _type->value, {{_type->line, _type->column}}));
-            
-            node->nodes.push_back(argument);
-
-            if (!accept(pack, TokenId::COMMA, TokenId::NEWLINE)) break;
-        }
-
-        return false;
-    }
-
     bool parse_function(Pack * pack, Node * node) {
+        auto fntok = expect(pack, TokenId::FN, TokenId::NEWLINE, "expected 'fn'");
         auto ident = expect(pack, TokenId::IDENT, TokenId::NEWLINE, "expected identifier");
-
-        auto fnnode = Node(AstId::FUNCTION, ident->value, {{pack->get_offset(-2).line, pack->get_offset(-2).column}}, build_function);
+ 
+        auto func = node->add_node<Function>(ident->value, fntok->position);
 
         expect(pack, TokenId::LPAREN, TokenId::NEWLINE, "expected '('");
 
-        parse_function_arguments(pack, &fnnode);
+        parse_function_arguments(pack, func);
 
         expect(pack, TokenId::RPAREN, TokenId::NEWLINE, "expected ')'");
 
-        auto ret_type = parse_type(pack);
+        auto ret_type = accept(pack, TokenId::IDENT, TokenId::NEWLINE);
 
         if (ret_type)
-            fnnode.nodes.push_back(Node(AstId::TYPE, ret_type->value, {{ret_type->line, ret_type->column}}));
-
-        if (accept(pack, TokenId::SEMICOLON, TokenId::NEWLINE)) {
-            node->nodes.push_back(fnnode);
-
-            return true;
-        }
+            func->set_return_type(ret_type->value);
 
         expect(pack, TokenId::LBRACE, TokenId::NEWLINE, "expected '{'");
 
-        auto body = Node(AstId::BODY, {}, {});
-        parse(pack, &body);
-        fnnode.nodes.push_back(body);
+        parse(pack, func);
 
         expect(pack, TokenId::RBRACE, TokenId::NEWLINE, "expected '}'");
-
-        fnnode.nodes.push_back(Node(AstId::END, {}, {}, build_end));
-        node->nodes.push_back(fnnode);
 
         return true;
     }
@@ -483,18 +439,16 @@ namespace neonc {
     inline bool __parse(Pack * pack, Node * node) {
         if (pack->get().token == TokenId::ENDOFFILE) {
             return false;
-        } else if (accept(pack, TokenId::NEWLINE, {})) {
-            // ignore
+        } else if (accept(pack, TokenId::NEWLINE, {}, false)) {
+            pack->next();
         } else if (pack->get().token == TokenId::RBRACE) {
             return false;
-        } else if (accept(pack, TokenId::FN, TokenId::NEWLINE)) {
+        } else if (accept(pack, TokenId::FN, TokenId::NEWLINE, false)) {
             if (!parse_function(pack, node)) return false;
-        } else if (accept(pack, TokenId::LET, TokenId::NEWLINE)) {
+        } else if (accept(pack, TokenId::LET, TokenId::NEWLINE, false)) {
             if (!parse_variable(pack, node)) return false;
-        } else if (accept(pack, TokenId::RET, TokenId::NEWLINE)) { 
+        } else if (accept(pack, TokenId::RET, TokenId::NEWLINE, false)) {
             if (!parse_return(pack, node)) return false;
-        } else if (accept(pack, TokenId::IDENT, TokenId::NEWLINE)) {
-            if (!parse_ident(pack, node)) return false;
         } else {
             throw_parse_error(pack, "unexpected");
         }
@@ -502,12 +456,12 @@ namespace neonc {
         return true;
     }
 
-    void parse(Pack * pack, Node * node, bool iterate) {
+    void parse(Pack * pack, std::shared_ptr<Node> node, bool iterate) {
         if (iterate) {
             while (true)
-                if (!__parse(pack, node))
+                if (!__parse(pack, node.get()))
                     break;
         } else
-            __parse(pack, node);
+            __parse(pack, node.get());
     }
 }

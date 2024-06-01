@@ -3,6 +3,7 @@
 #include "../lexer/token.h"
 #include "pack.h"
 #include "../ast/ast.h"
+#include "../ast/root.h"
 #include "../util/cwd.h"
 #include "grammar.h"
 #include <neonc.h>

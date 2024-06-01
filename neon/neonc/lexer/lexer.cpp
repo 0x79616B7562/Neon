@@ -19,8 +19,7 @@ namespace neonc {
         tokens.push_back(Token {
             token,
             value,
-            line,
-            column - uint64_t(value.length()) + 1
+            { line, column - uint64_t(value.length()) + 1 }
         });
 
         if (token == TokenId::NEWLINE) {
@@ -228,8 +227,7 @@ namespace neonc {
         tokens.push_back(Token {
             TokenId::ENDOFFILE,
             "",
-            line,
-            1
+            { line, 0 }
         });
 
         return tokens;

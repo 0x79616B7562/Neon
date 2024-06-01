@@ -16,6 +16,6 @@ namespace neonc {
             v = "\\t";
         }
 
-        std::cout << ColorCyan << token << ColorReset << " \"" << v << "\" " << std::to_string(line) << ":" << std::to_string(column) << std::endl;
+        std::cout << ColorCyan << token << ColorReset << " \"" << v << "\" " << position.string() << std::endl;
     }
 }

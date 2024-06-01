@@ -5,12 +5,11 @@
 namespace neonc {
     class AbstractSyntaxTree {
     public:
-        AbstractSyntaxTree(Node root): root(root) {}
+        AbstractSyntaxTree(std::shared_ptr<Node> root): root(root) {}
 
-        const std::string get_root_data() const;
-        Node * get_root_ptr();
+        std::shared_ptr<Node> get_root_ptr();
         void dump() const;
     private:
-        Node root;
+        std::shared_ptr<Node> root;
     };
 }

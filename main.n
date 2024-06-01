@@ -1,5 +1,11 @@
-fn printf(_: str, _: ...) i32;
+fn ahoj(a, b: i32) i32 {
+    return a + b * 10
+}
 
 fn main() {
-    let mut a: i32 = 10
+    let b: i32 = 20
+    let mut a: i32 = 10 * b
+    let c: str = "ahoj"
+    let d: bool = true
+    let y: i32 = ahoj(10, 20)
 }

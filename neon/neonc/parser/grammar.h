@@ -4,25 +4,32 @@
 #include "err.h"
 #include "pack.h"
 #include "../ast/node.h"
-#include "../ast2at/build.h"
+#include "../ast/function.h"
+#include "../ast/variable.h"
+#include "../ast/expression.h"
+#include "../ast/number.h"
+#include "../ast/operator.h"
+#include "../ast/identifier.h"
+#include "../ast/string.h"
+#include "../ast/boolean.h"
+#include "../ast/call.h"
+#include "../ast/return.h"
 
 namespace neonc {
     const std::optional<Token> parse_type(Pack * pack);
 
     void evaluate_expression(Node * node);
 
-    bool parse_arguments(Pack * pack, Node * node);
-    bool parse_ident_in_expr(Pack * pack, Node * node);
+    bool parse_ident(Pack * pack, Node * node);
     bool parse_string(Pack * pack, Node * node);
     bool parse_boolean(Pack * pack, Node * node);
     bool parse_number(Pack * pack, Node * node);
     bool parse_operator(Pack * pack, Node * node);
-    bool parse_expr(Pack * pack, Node * node);
-    bool parse_ident(Pack * pack, Node * node);
+    bool parse_expression(Pack * pack, Node * node);
     bool parse_return(Pack * pack, Node * node);
     bool parse_variable(Pack * pack, Node * node);
-    bool parse_function_arguments(Pack * pack, Node * node);
+    bool parse_function_arguments(Pack * pack, std::shared_ptr<Function> node);
     bool parse_function(Pack * pack, Node * node);
 
-    void parse(Pack * pack, Node * node, bool iterate = true);
+    void parse(Pack * pack, std::shared_ptr<Node> node, bool iterate = true);
 }

@@ -6,7 +6,6 @@
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 #include <neonc.h>
-#include "at/at.h"
 
 namespace neonc {
     void build(const char * entry) {
@@ -26,15 +25,6 @@ namespace neonc {
         auto ast = parser.parse_ast(file_path, tokens);
 
         ast.dump();
-        std::cout << std::endl;
-
-        auto at = ActionTree();
-
-        build_ast(ast.get_root_ptr(), &at);
-
-        std::cout << "\nAction Tree:" << std::endl;
-        at.dump();
-
         std::cout << std::endl;
 
         measure.finish("FINISHED IN:");

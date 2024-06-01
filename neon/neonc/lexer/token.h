@@ -3,6 +3,7 @@
 #include "../util/clicolor.h"
 #include "../types/tokenid.h"
 #include <neonc.h>
+#include "../types/position.h"
 
 namespace neonc {
     struct Token {
@@ -11,7 +12,6 @@ namespace neonc {
         const TokenId token;
         const std::string value;
 
-        const uint64_t line;
-        const uint64_t column;
+        const Position position;
     };
 }

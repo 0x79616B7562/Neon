@@ -6,4 +6,5 @@
 
 namespace neonc {
     void throw_parse_error(const Pack * pack, const char * message);
+    void throw_parse_error_at_position(const Pack * pack, const Position position, const char * message);
 }
