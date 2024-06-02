@@ -12,8 +12,7 @@ namespace neonc {
         TAB,
         NEWLINE,
 
-        LET,
-        MUT,
+        VAR,
         FN,
         RET,
 

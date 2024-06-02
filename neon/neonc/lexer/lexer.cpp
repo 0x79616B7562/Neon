@@ -39,8 +39,7 @@ namespace neonc {
 
     constexpr inline TokenId resolve_ident(std::string ident) {
         cmp("fn", TokenId::FN)
-        cmp("let", TokenId::LET)
-        cmp("mut", TokenId::MUT)
+        cmp("var", TokenId::VAR)
         cmp("true", TokenId::TRUE)
         cmp("false", TokenId::FALSE)
         cmp("return", TokenId::RET)

@@ -331,8 +331,7 @@ namespace neonc {
     }
 
     bool parse_variable(Pack * pack, Node * node) {
-        auto let = expect(pack, TokenId::LET, TokenId::NEWLINE, "expected 'let'");
-        auto mut = accept(pack, TokenId::MUT, TokenId::NEWLINE);
+        auto _var = expect(pack, TokenId::VAR, TokenId::NEWLINE, "expected 'let'");
         auto ident = expect(pack, TokenId::IDENT, TokenId::NEWLINE, "expected identifier");
 
         if (accept(pack, TokenId::COLON, TokenId::NEWLINE)) {
@@ -344,7 +343,7 @@ namespace neonc {
                 return false;
             }
 
-            auto var = node->add_node<Variable>(ident->value, _type->value, let->position);
+            auto var = node->add_node<Variable>(ident->value, _type->value, _var->position);
 
             if (accept(pack, TokenId::EQUALS, TokenId::NEWLINE)) {
                 if (!parse_expression(pack, var.get())) {
@@ -356,7 +355,7 @@ namespace neonc {
         } else {
             expect(pack, TokenId::EQUALS, TokenId::NEWLINE, "expected ':' or '='");
 
-            auto var = node->add_node<Variable>(ident->value, std::nullopt, let->position);
+            auto var = node->add_node<Variable>(ident->value, std::nullopt, _var->position);
 
             if (!parse_expression(pack, var.get())) {
                 throw_parse_error(pack, "expected expression");
@@ -445,7 +444,7 @@ namespace neonc {
             return false;
         } else if (accept(pack, TokenId::FN, TokenId::NEWLINE, false)) {
             if (!parse_function(pack, node)) return false;
-        } else if (accept(pack, TokenId::LET, TokenId::NEWLINE, false)) {
+        } else if (accept(pack, TokenId::VAR, TokenId::NEWLINE, false)) {
             if (!parse_variable(pack, node)) return false;
         } else if (accept(pack, TokenId::RET, TokenId::NEWLINE, false)) {
             if (!parse_return(pack, node)) return false;

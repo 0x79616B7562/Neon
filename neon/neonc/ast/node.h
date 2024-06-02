@@ -3,6 +3,7 @@
 #include "../types/position.h"
 #include <neonc.h>
 #include "../util/clicolor.h"
+#include "../llvm/module.h"
 
 #define DEF_INDENT_MUL 4
 
@@ -12,6 +13,10 @@ namespace neonc {
         virtual ~Node() = default;
 
         virtual void dump(const uint32_t indent) const = 0;
+
+        virtual void * build(Module & module) {
+            return nullptr;
+        }
 
         template<typename T, typename ... Args>
         std::shared_ptr<T> add_node(Args ... args) {

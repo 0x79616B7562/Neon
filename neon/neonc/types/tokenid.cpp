@@ -8,8 +8,7 @@ namespace neonc {
             case TokenId::WHITESPACE: return os << "WHITESPACE";
             case TokenId::TAB: return os << "TAB";
             case TokenId::NEWLINE: return os << "NEWLINE";
-            case TokenId::LET: return os << "LET";
-            case TokenId::MUT: return os << "MUT";
+            case TokenId::VAR: return os << "VAR";
             case TokenId::FN: return os << "FN";
             case TokenId::RET: return os << "RETURN";
             case TokenId::COLON: return os << "COLON";

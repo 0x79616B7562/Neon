@@ -24,6 +24,10 @@ namespace neonc {
             return position;
         }
 
+        const std::string get_identifier() const {
+            return identifier;
+        }
+
         void set_type(const std::optional<std::string> _type) {
             type = _type;
         }

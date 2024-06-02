@@ -2,6 +2,7 @@
 
 #include "node.h"
 #include <neonc.h>
+#include "expression.h"
 
 namespace neonc {
     struct Call : public Node {
@@ -18,6 +19,10 @@ namespace neonc {
             }
 
             std::cout << ColorYellow << ")" << ColorReset;
+        }
+
+        llvm::Value * build(Module & module, std::vector<llvm::Value *> args) {
+            return module.get_builder()->CreateCall(module.module->getFunction(identifier), args);
         }
 
         std::string identifier;

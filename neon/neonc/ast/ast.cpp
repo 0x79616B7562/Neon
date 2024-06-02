@@ -8,4 +8,8 @@ namespace neonc {
     void AbstractSyntaxTree::dump() const {
         root->dump(0);
     }
+
+    void AbstractSyntaxTree::build(Module & module) {
+        root->build(module);
+    }
 }

@@ -6,6 +6,7 @@
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 #include <neonc.h>
+#include "llvm/target.h"
 
 namespace neonc {
     void build(const char * entry) {
@@ -26,6 +27,16 @@ namespace neonc {
 
         ast.dump();
         std::cout << std::endl;
+
+        auto target = Target();
+        auto module = target.create_module(std::string(entry));
+
+        ast.build(module);
+
+        module.dump();
+        module.verify();
+
+        target.module_to_object_file(module, file_path);
 
         measure.finish("FINISHED IN:");
     }

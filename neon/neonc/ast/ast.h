@@ -9,6 +9,7 @@ namespace neonc {
 
         std::shared_ptr<Node> get_root_ptr();
         void dump() const;
+        void build(Module & module);
     private:
         std::shared_ptr<Node> root;
     };

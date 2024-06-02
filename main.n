@@ -1,11 +1,12 @@
-fn ahoj(a, b: i32) i32 {
-    return a + b * 10
+fn test(a, b: i32) i32 {
+    var t: i32 = 100
+
+    return a + b * t
 }
 
-fn main() {
-    let b: i32 = 20
-    let mut a: i32 = 10 * b
-    let c: str = "ahoj"
-    let d: bool = true
-    let y: i32 = ahoj(10, 20)
+fn main() i32 {
+    var a: i32 = 10
+    var b: i32 = a + test(10, 20)
+
+    return 0
 }
