@@ -24,7 +24,12 @@ namespace neonc {
             if (type == llvm::Type::getFloatTy(*module.context)) return llvm::ConstantFP::get(llvm::Type::getFloatTy(*module.context), std::stod(value));
             if (type == llvm::Type::getDoubleTy(*module.context)) return llvm::ConstantFP::get(llvm::Type::getDoubleTy(*module.context), std::stod(value));
 
-            throw std::invalid_argument("unknown create_constat type");
+            //
+
+            if (type == nullptr)
+                throw std::invalid_argument("ICE: type in number.h is nullptr");
+
+            throw std::invalid_argument("ICE: unknown create_constat type in number.h");
         }
 
         std::string value;

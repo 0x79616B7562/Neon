@@ -15,6 +15,9 @@ namespace neonc {
         if (type == "f32") return llvm::Type::getFloatTy(*module.context);
         if (type == "f64") return llvm::Type::getDoubleTy(*module.context);
 
+        // str
+        if (type == "str") return module.dummy_builder->getPtrTy();
+
         return nullptr;
     }
 }

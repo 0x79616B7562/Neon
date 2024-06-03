@@ -377,6 +377,25 @@ namespace neonc {
                 break;
 
             if (accept(pack, TokenId::COLON, TokenId::NEWLINE, "expected ':'")) {
+                if (accept(pack, TokenId::DOT, TokenId::NEWLINE)) {
+                    expect(pack, TokenId::DOT, TokenId::NEWLINE, "expected '...'");
+                    expect(pack, TokenId::DOT, TokenId::NEWLINE, "expected '...'");
+
+                    func->set_variadic(true);
+
+                    auto _type = parse_type(pack);
+                    
+                    if (!_type) {
+                        throw_parse_error(pack, "expected type");
+                    
+                        return false;
+                    }
+
+                    func->set_variadic_type(_type->value);
+
+                    break;
+                }
+
                 auto _type = parse_type(pack);
 
                 if (!_type) {
@@ -426,6 +445,12 @@ namespace neonc {
         if (ret_type)
             func->set_return_type(ret_type->value);
 
+        if (accept(pack, TokenId::SEMICOLON, TokenId::NEWLINE)) {
+            func->set_is_declaration(true);
+
+            return true;
+        }
+
         expect(pack, TokenId::LBRACE, TokenId::NEWLINE, "expected '{'");
 
         parse(pack, func);
@@ -435,7 +460,7 @@ namespace neonc {
         return true;
     }
 
-    inline bool __parse(Pack * pack, Node * node) {
+    inline static bool __parse(Pack * pack, Node * node) {
         if (pack->get().token == TokenId::ENDOFFILE) {
             return false;
         } else if (accept(pack, TokenId::NEWLINE, {}, false)) {

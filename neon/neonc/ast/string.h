@@ -11,6 +11,10 @@ namespace neonc {
             std::cout << "\"" << string << "\"";
         }
 
+        void * build(Module & module) {
+            return module.get_builder()->CreateGlobalString(string);
+        }
+
         std::string string;
     };
 }

@@ -47,7 +47,7 @@ namespace neonc {
             auto func_type = llvm::FunctionType::get(
                 return_type ? str_to_type(module, return_type.value()) : llvm::Type::getVoidTy(*module.context),
                 args,
-                false
+                is_variadic
             );
 
             auto func = llvm::Function::Create(
@@ -72,16 +72,18 @@ namespace neonc {
 
             //
 
-            llvm::BasicBlock::Create(*module.context, "", func);
-            std::shared_ptr<llvm::IRBuilder<>> builder(new llvm::IRBuilder<>(&func->getEntryBlock(), func->getEntryBlock().begin()));
-      
-            std::map<std::string, llvm::Value *> _arguments;
-            for (uint32_t i = 0; i < arguments.size(); i++) {
-                _arguments[arguments[i].get_identifier()] = func->getArg(i);
-            }
+            if (!is_declaration) {
+                llvm::BasicBlock::Create(*module.context, "", func);
+                std::shared_ptr<llvm::IRBuilder<>> builder(new llvm::IRBuilder<>(&func->getEntryBlock(), func->getEntryBlock().begin()));
+          
+                std::map<std::string, llvm::Value *> _arguments;
+                for (uint32_t i = 0; i < arguments.size(); i++) {
+                    _arguments[arguments[i].get_identifier()] = func->getArg(i);
+                }
 
-            module.pointer = identifier;
-            module.functions[identifier] = {{func, _arguments}, builder};
+                module.pointer = identifier;
+                module.functions[identifier] = {{func, _arguments}, builder};
+            }
 
             return nullptr;
         }
@@ -98,10 +100,33 @@ namespace neonc {
             return_type = _return_type;
         }
 
-        const std::string identifier;
+        void set_is_declaration(bool _is_declaration) {
+            is_declaration = _is_declaration;
+        }
 
+        void set_variadic(bool _is_variadic) {
+            is_variadic = _is_variadic;
+        }
+        
+        void set_variadic_type(std::optional<std::string> _variadic_type) {
+            variadic_type = _variadic_type;
+        }
+
+        const std::string get_variadic_type() const {
+            return variadic_type.value();
+        }
+
+        bool get_variadic() const {
+            return is_variadic;
+        }
+
+        const std::string identifier;
     private:
         std::optional<std::string> return_type = std::nullopt;
         std::vector<Argument> arguments;
+        bool is_declaration = false;
+
+        bool is_variadic = false;
+        std::optional<std::string> variadic_type = std::nullopt;
     };
 }

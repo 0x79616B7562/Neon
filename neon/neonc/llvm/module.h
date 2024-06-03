@@ -9,10 +9,14 @@ namespace neonc {
             std::shared_ptr<llvm::Module> module,
             const std::string target_cpu,
             const std::string target_features
-        ): context(context), module(module), target_cpu(target_cpu), target_features(target_features) {}
+        ): context(context), module(module), target_cpu(target_cpu), target_features(target_features) {
+            dummy_builder = std::make_shared<llvm::IRBuilder<>>(*context);
+        }
 
         void dump() const;
         void verify() const;
+
+        std::shared_ptr<llvm::IRBuilder<>> dummy_builder;
 
         llvm::Function * get_function();
         std::map<std::string, llvm::Value *> & get_arguments();

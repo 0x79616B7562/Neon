@@ -6,6 +6,7 @@
 #include "number.h"
 #include "identifier.h"
 #include "call.h"
+#include "string.h"
 
 namespace neonc {
     struct Expression : public Node {
@@ -78,10 +79,31 @@ namespace neonc {
                         if (expr) {
                             args.push_back(expr->build(module, module.module->getFunction(call->identifier)->getArg(i)->getType()));
                         }
+
+                        if (module.module->getFunction(call->identifier)->arg_size() < i - 1 && module.module->getFunction(call->identifier)->isVarArg())
+                            break;
+                    }
+
+                    if (module.module->getFunction(call->identifier)->isVarArg()) {
+                        for (uint32_t i = module.module->getFunction(call->identifier)->arg_size(); i < call->nodes.size(); i++) {
+                            auto expr = std::dynamic_pointer_cast<Expression>(call->nodes[i]);
+
+                            if (expr) {
+                                args.push_back(expr->build(module, llvm::Type::getInt32Ty(*module.context)));
+                            }
+                        }
                     }
 
                     auto _value = (llvm::Value *)call->build(module, args);
                     value = op.has_value() ? op->get()->build(module, value, _value, type) : _value;
+
+                    continue;
+                }
+
+                auto string = std::dynamic_pointer_cast<String>(n);
+
+                if (string) {
+                    value = (llvm::Value *)string->build(module);
 
                     continue;
                 }

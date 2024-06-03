@@ -3,6 +3,29 @@
 #define cmp(s, t) if (ident == s) return t;
 
 namespace neonc {
+    static void correct_buffer_for_string(std::string & str) {
+        std::vector<std::tuple<std::string, std::string>> v = {
+            {"\\n", "\n"},
+            {"\\t", "\t"},
+            {"\\r", "\r"},
+            {"\\b", "\b"},
+            {"\\f", "\f"},
+            {"\\a", "\a"},
+            {"\\v", "\v"},
+        };
+
+        for (auto _v : v) {        
+            std::string::size_type pos = 0;
+            const std::string b = std::get<0>(_v);
+            const std::string a = std::get<1>(_v);
+
+            while ((pos = str.find(b, pos)) != std::string::npos) {
+                str.replace(pos, b.length(), a);
+                pos += a.length();
+            }
+        }
+    }
+
     inline void throw_error(const std::string file_path, uint32_t line, uint32_t column, const char * value, const char * message) {
         auto src = extract_from_file(file_path, line);
 
@@ -201,10 +224,13 @@ namespace neonc {
             }
 
             cursor++;
+
             continue;
     in_string_block:
             if (input[cursor] == '\"') {
-                in_string = false;
+                in_string = false; 
+
+                correct_buffer_for_string(buffer);
 
                 add_token(tokens, TokenId::STRING, buffer, line, column);
 
@@ -214,8 +240,14 @@ namespace neonc {
                 column++;
             } else {
                 buffer += input[cursor];
+
                 cursor++;
                 column++;
+
+                if (input[cursor] == '\n') {
+                    line++;
+                    column = 0;
+                }
             }
         }
 
