@@ -9,20 +9,20 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DNDEBUG")
 
+add_definitions(
+    -D__STDC_LIMIT_MACROS
+    -D__STDC_CONSTANT_MACROS
+)
+
 ### LLVM
 
-execute_process(COMMAND ${PROJECT_SOURCE_DIR}/build/debug/llvm/bin/llvm-config --version OUTPUT_VARIABLE LLVM_VERSION)
-message("LLVM VERSION: " ${LLVM_VERSION})
+find_package(LLVM REQUIRED CONFIG PATHS ${PROJECT_SOURCE_DIR}/build/debug/llvm/build/debug/llvm/installed NO_DEFAULT_PATH)
 
-execute_process(COMMAND ${PROJECT_SOURCE_DIR}/build/debug/llvm/bin/llvm-config --includedir OUTPUT_VARIABLE LLVM_INCLUDE)
-execute_process(COMMAND ${PROJECT_SOURCE_DIR}/build/debug/llvm/bin/llvm-config --ldflags --libs --system-libs all OUTPUT_VARIABLE LLVM_LIBRARIES)
-execute_process(COMMAND ${PROJECT_SOURCE_DIR}/build/debug/llvm/bin/llvm-config --cppflags OUTPUT_VARIABLE LLVM_CPP_FLAGS)
+message(STATUS "LLVM Version: ${LLVM_PACKAGE_VERSION}")
+message(STATUS "LLVMConfig.cmake path: ${LLVM_DIR}")
 
-string(STRIP ${LLVM_INCLUDE} LLVM_INCLUDE)
-string(STRIP ${LLVM_CPP_FLAGS} LLVM_CPP_FLAGS)
-string(STRIP ${LLVM_LIBRARIES} LLVM_LIBRARIES)
-
-add_definitions(${LLVM_CPP_FLAGS})
+separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
+add_definitions(${LLVM_DEFINITIONS_LIST})
 
 ###
 
@@ -38,7 +38,9 @@ file(
 
 add_library(neonc STATIC ${NEONC_SRC_FILES})
 
-target_include_directories(neonc PRIVATE ${LLVM_INCLUDE} include neon)
+target_include_directories(neonc PRIVATE ${LLVM_INCLUDE_DIRS} include neon)
+
+llvm_map_components_to_libnames(LLVM_LIBRARIES all)
 target_link_libraries(neonc ${LLVM_LIBRARIES})
 
 target_precompile_headers(neonc PRIVATE include/neonc.h)
@@ -84,10 +86,10 @@ else()
     )
 endif()
 
-if (UNIX AND NOT APPLE)
-    execute_process(COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version ERROR_QUIET OUTPUT_VARIABLE ld_version)
-    if ("${ld_version}" MATCHES "GNU gold")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
-        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
-    endif()
-endif()
+# if (UNIX AND NOT APPLE)
+#     execute_process(COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version ERROR_QUIET OUTPUT_VARIABLE ld_version)
+#     if ("${ld_version}" MATCHES "GNU gold")
+#         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
+#         set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=gold -Wl,--disable-new-dtags")
+#     endif()
+# endif()

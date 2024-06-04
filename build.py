@@ -11,12 +11,13 @@ def build_linux():
         os.system(
             "cd build/debug/llvm "
             + "&& cmake "
-            + "-DCMAKE_BUILD_TYPE=Debug "
+            + "-DCMAKE_BUILD_TYPE=Release "
             + "-DCMAKE_INSTALL_PREFIX=build/debug/llvm/installed "
             + "-DLLVM_ENABLE_TERMINFO=OFF "
+            + "-DLLVM_ENABLE_RTTI=ON "
             + "../../../llvm/llvm "
             + "&& make "
-            + "&& sudo make install"
+            + "&& make install"
         )
 
     print("Building neon")
