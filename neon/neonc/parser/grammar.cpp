@@ -364,6 +364,8 @@ namespace neonc {
             }
         }
 
+        CHECK_NEWLINE_OR_SEMICOLON;
+
         return true;
     }
 
@@ -485,7 +487,8 @@ namespace neonc {
             while (true)
                 if (!__parse(pack, node.get()))
                     break;
-        } else
+        } else {
             __parse(pack, node.get());
+        }
     }
 }

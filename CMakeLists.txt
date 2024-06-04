@@ -9,20 +9,19 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DNDEBUG")
 
-add_definitions(
-    -D__STDC_LIMIT_MACROS
-    -D__STDC_CONSTANT_MACROS
-)
-
 ### LLVM
 
-find_package(LLVM REQUIRED CONFIG PATHS ${PROJECT_SOURCE_DIR}/build/debug/llvm/build/debug/llvm/installed NO_DEFAULT_PATH)
+find_package(LLVM REQUIRED CONFIG)
 
-message(STATUS "LLVM Version: ${LLVM_PACKAGE_VERSION}")
+message(STATUS "LLVM version: ${LLVM_PACKAGE_VERSION}")
 message(STATUS "LLVMConfig.cmake path: ${LLVM_DIR}")
+message(STATUS "LLVM include dirs: ${LLVM_INCLUDE_DIRS}")
+message(STATUS "LLVM definitions: ${LLVM_DEFINITIONS}")
 
-separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
-add_definitions(${LLVM_DEFINITIONS_LIST})
+llvm_map_components_to_libnames(LLVM_LIBRARIES core support irreader passes native)
+message(STATUS "LLVM libs: ${LLVM_LIBRARIES}")
+
+add_definitions(${LLVM_DEFINITIONS})
 
 ###
 
@@ -39,8 +38,6 @@ file(
 add_library(neonc STATIC ${NEONC_SRC_FILES})
 
 target_include_directories(neonc PRIVATE ${LLVM_INCLUDE_DIRS} include neon)
-
-llvm_map_components_to_libnames(LLVM_LIBRARIES all)
 target_link_libraries(neonc ${LLVM_LIBRARIES})
 
 target_precompile_headers(neonc PRIVATE include/neonc.h)
