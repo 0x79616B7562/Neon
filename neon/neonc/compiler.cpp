@@ -31,6 +31,7 @@ namespace neonc {
         auto target = Target();
         auto module = target.create_module(std::string(entry));
 
+        ast.verify();
         ast.build(module);
 
         module.dump();

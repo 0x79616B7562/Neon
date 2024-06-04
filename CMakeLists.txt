@@ -9,28 +9,20 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DNDEBUG")
 
-add_definitions(
-    -D__STDC_LIMIT_MACROS
-    -D__STDC_CONSTANT_MACROS
-)
-
 ### LLVM
 
-execute_process(COMMAND llvm-config --version OUTPUT_VARIABLE LLVM_VERSION)
+execute_process(COMMAND ${PROJECT_SOURCE_DIR}/build/debug/llvm/bin/llvm-config --version OUTPUT_VARIABLE LLVM_VERSION)
 message("LLVM VERSION: " ${LLVM_VERSION})
-string(STRIP ${LLVM_VERSION} LLVM_VERSION)
 
-string(COMPARE NOTEQUAL ${LLVM_VERSION} "18.1.6" LLVM_VERSION_PASSED)
-
-if(${LLVM_VERSION_PASSED})
-    message(FATAL_ERROR "LLVM VERSION REQUIRED: 18.1.6")
-endif()
-
-execute_process(COMMAND llvm-config --includedir OUTPUT_VARIABLE LLVM_INCLUDE)
-execute_process(COMMAND llvm-config --libs all OUTPUT_VARIABLE LLVM_LIBRARIES)
+execute_process(COMMAND ${PROJECT_SOURCE_DIR}/build/debug/llvm/bin/llvm-config --includedir OUTPUT_VARIABLE LLVM_INCLUDE)
+execute_process(COMMAND ${PROJECT_SOURCE_DIR}/build/debug/llvm/bin/llvm-config --ldflags --libs --system-libs all OUTPUT_VARIABLE LLVM_LIBRARIES)
+execute_process(COMMAND ${PROJECT_SOURCE_DIR}/build/debug/llvm/bin/llvm-config --cppflags OUTPUT_VARIABLE LLVM_CPP_FLAGS)
 
 string(STRIP ${LLVM_INCLUDE} LLVM_INCLUDE)
+string(STRIP ${LLVM_CPP_FLAGS} LLVM_CPP_FLAGS)
 string(STRIP ${LLVM_LIBRARIES} LLVM_LIBRARIES)
+
+add_definitions(${LLVM_CPP_FLAGS})
 
 ###
 
@@ -88,6 +80,7 @@ else()
         -Wno-error=reorder
         -Wno-reorder
         -Wno-error=maybe-uninitialized
+        -Wno-error=overloaded-virtual
     )
 endif()
 

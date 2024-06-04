@@ -32,7 +32,7 @@ namespace neonc {
             opt,
             llvm::Reloc::PIC_,
             llvm::CodeModel::Medium,
-            llvm::CodeGenOptLevel::None
+            llvm::CodeGenOpt::None
         );
 
         target_machine = std::unique_ptr<llvm::TargetMachine>(tm);
@@ -99,7 +99,7 @@ namespace neonc {
         }
 
         llvm::legacy::PassManager pass;
-        auto ft = llvm::CodeGenFileType::ObjectFile;
+        auto ft = llvm::CodeGenFileType::CGFT_ObjectFile;
 
         if (target_machine->addPassesToEmitFile(pass, dest, nullptr, ft)) {
             llvm::errs() << "TargetMachine can't emit a file of this type";
