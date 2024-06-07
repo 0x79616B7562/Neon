@@ -26,6 +26,7 @@ namespace neonc {
     bool parse_number(Pack * pack, Node * node);
     bool parse_operator(Pack * pack, Node * node);
     bool parse_expression(Pack * pack, Node * node);
+    bool parse_standalone_expression(Pack * pack, Node * node);
     bool parse_return(Pack * pack, Node * node);
     bool parse_variable(Pack * pack, Node * node);
     bool parse_function_arguments(Pack * pack, std::shared_ptr<Function> node);

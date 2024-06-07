@@ -25,14 +25,14 @@ namespace neonc {
         auto parser = Parser();
         auto ast = parser.parse_ast(file_path, tokens);
 
-        ast.dump();
-        std::cout << std::endl;
-
         auto target = Target();
         auto module = target.create_module(std::string(entry));
 
-        ast.verify();
+        ast.verify(module);
+        ast.dump();
+        std::cout << std::endl;
         ast.build(module);
+        ast.finalize(module);
 
         module.dump();
         module.verify();

@@ -5,6 +5,7 @@
 #include "operator.h"
 #include "number.h"
 #include "identifier.h"
+#include "boolean.h"
 #include "call.h"
 #include "string.h"
 
@@ -49,6 +50,15 @@ namespace neonc {
                     auto _value = num->build(module, type);
                     value = op.has_value() ? op->get()->build(module, value, _value, type) : _value;
                     
+                    continue;
+                }
+
+                auto boolean = std::dynamic_pointer_cast<Boolean>(n);
+
+                if (boolean) {
+                    auto _value = (llvm::Value *)boolean->build(module);
+                    value = op.has_value() ? op->get()->build(module, value, _value, type) : _value;
+
                     continue;
                 }
 

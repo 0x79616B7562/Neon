@@ -71,12 +71,9 @@ namespace neonc {
     //
 
     const std::optional<Token> parse_type(Pack * pack) {
-        auto ptr = accept(pack, TokenId::ASTERISK, TokenId::NEWLINE);
         auto _type = accept(pack, TokenId::IDENT, TokenId::NEWLINE);
 
         std::string __type = "";
-
-        if (ptr) __type += "*";
         
         if (_type) {
             __type += _type->value;
@@ -320,6 +317,17 @@ namespace neonc {
         return true;
     }
 
+    bool parse_standalone_expression(Pack * pack, Node * node) {
+        auto var = std::make_shared<Variable>();
+
+        if (parse_expression(pack, var.get()))
+            node->add_node(var);
+
+        CHECK_NEWLINE_OR_SEMICOLON;
+
+        return true;
+    }
+
     bool parse_return(Pack * pack, Node * node) {
         auto ret = node->add_node<Return>(accept(pack, TokenId::RET, TokenId::NEWLINE)->position);
 
@@ -393,6 +401,7 @@ namespace neonc {
                         return false;
                     }
 
+                    func->set_varadic_identifier(ident->value);
                     func->set_variadic_type(_type->value);
 
                     break;
@@ -465,7 +474,7 @@ namespace neonc {
     inline static bool __parse(Pack * pack, Node * node) {
         if (pack->get().token == TokenId::ENDOFFILE) {
             return false;
-        } else if (accept(pack, TokenId::NEWLINE, {}, false)) {
+        } else if (accept(pack, TokenId::NEWLINE, {}, false) || accept(pack, TokenId::SEMICOLON, {}, false)) {
             pack->next();
         } else if (pack->get().token == TokenId::RBRACE) {
             return false;
@@ -475,6 +484,8 @@ namespace neonc {
             if (!parse_variable(pack, node)) return false;
         } else if (accept(pack, TokenId::RET, TokenId::NEWLINE, false)) {
             if (!parse_return(pack, node)) return false;
+        } else if (parse_standalone_expression(pack, node)) {
+            // nothing to do
         } else {
             throw_parse_error(pack, "unexpected");
         }
@@ -484,9 +495,11 @@ namespace neonc {
 
     void parse(Pack * pack, std::shared_ptr<Node> node, bool iterate) {
         if (iterate) {
-            while (true)
-                if (!__parse(pack, node.get()))
+            while (true) {
+                if (!__parse(pack, node.get())) {
                     break;
+                }
+            }
         } else {
             __parse(pack, node.get());
         }

@@ -18,6 +18,8 @@ namespace neonc {
             return nullptr;
         }
 
+        virtual void finalize(Module & module) {}
+
         template<typename T, typename ... Args>
         std::shared_ptr<T> add_node(Args ... args) {
             nodes.push_back(std::make_shared<T>(args...));

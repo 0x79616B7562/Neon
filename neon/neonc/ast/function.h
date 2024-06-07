@@ -22,10 +22,23 @@ namespace neonc {
                     std::cout << ", ";
             }
 
+            if (is_variadic) {
+                if (!arguments.empty())
+                    std::cout << ", ";
+
+                std::cout << variadic_identifier.value() << ": ..." << variadic_type.value();
+            }
+
             std::cout << ") ";
 
             if (return_type)
                 std::cout << return_type.value() << " ";
+
+            if (is_declaration) {
+                std::cout << ";" << std::endl;
+
+                return;
+            }
 
             std::cout << "{\n";
 
@@ -45,6 +58,7 @@ namespace neonc {
             }
 
             auto func_type = llvm::FunctionType::get(
+                identifier == "main" ? str_to_type(module, "i32") :
                 return_type ? str_to_type(module, return_type.value()) : llvm::Type::getVoidTy(*module.context),
                 args,
                 is_variadic
@@ -88,6 +102,18 @@ namespace neonc {
             return nullptr;
         }
 
+        void finalize(Module & module) {
+            if (identifier == "main") {
+                module.get_builder(identifier)->CreateRet(module.get_builder()->getInt32(0));
+
+                return;
+            }
+
+            if (!return_type) {
+                module.get_builder(identifier)->CreateRetVoid();
+            }
+        }
+
         void add_argument(Argument argument) {
             arguments.push_back(argument);
         }
@@ -112,6 +138,10 @@ namespace neonc {
             variadic_type = _variadic_type;
         }
 
+        void set_varadic_identifier(std::optional<std::string> _variadic_identifier) {
+            variadic_identifier = _variadic_identifier;
+        }
+
         const std::string get_variadic_type() const {
             return variadic_type.value();
         }
@@ -127,6 +157,7 @@ namespace neonc {
         bool is_declaration = false;
 
         bool is_variadic = false;
+        std::optional<std::string> variadic_identifier = std::nullopt;
         std::optional<std::string> variadic_type = std::nullopt;
     };
 }

@@ -34,4 +34,16 @@ namespace neonc {
     std::shared_ptr<llvm::IRBuilder<>> Module::get_builder() {
         return std::get<1>(functions[pointer]);
     }
+
+    llvm::Function * Module::get_function(const std::string & id) {
+        return std::get<0>(std::get<0>(functions[id]));
+    }
+
+    std::map<std::string, llvm::Value *> & Module::get_arguments(const std::string & id) {
+        return std::get<1>(std::get<0>(functions[id]));
+    }
+
+    std::shared_ptr<llvm::IRBuilder<>> Module::get_builder(const std::string & id) {
+        return std::get<1>(functions[id]);
+    }
 }

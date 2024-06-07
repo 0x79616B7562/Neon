@@ -5,11 +5,14 @@
 
 namespace neonc {
     struct Boolean : public Node {
-        Boolean(const bool value, const std::optional<Position> position): value(value), Node(position) {}
-
-        virtual void dump(const uint32_t indentation) const {
-            if (value) std::cout << "true";
-            else std::cout << "false";
+        Boolean(bool value, std::optional<Position> position): value(value), Node(position) {}
+ 
+        virtual void dump(const uint32_t indent) const {
+            std::cout << (value ? "true" : "false");
+        }
+ 
+        void * build(Module & module) {
+            return module.get_builder()->getInt1(value);
         }
 
         bool value;

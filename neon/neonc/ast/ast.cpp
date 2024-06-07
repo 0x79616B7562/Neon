@@ -9,7 +9,8 @@ namespace neonc {
         root->dump(0);
     }
 
-    void AbstractSyntaxTree::verify() {
+    void AbstractSyntaxTree::verify(Module & module) {
+
         verified = true;
     }
 
@@ -20,5 +21,16 @@ namespace neonc {
         }
 
         root->build(module);
+
+        built = true;
+    }
+
+    void AbstractSyntaxTree::finalize(Module & module) {
+        if (!built) {
+            std::cerr << "ICE: unable to finalize unbuilt ast, call build()" << std::endl;
+            exit(0);
+        }
+        
+        root->finalize(module);
     }
 }

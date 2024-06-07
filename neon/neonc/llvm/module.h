@@ -21,6 +21,9 @@ namespace neonc {
         llvm::Function * get_function();
         std::map<std::string, llvm::Value *> & get_arguments();
         std::shared_ptr<llvm::IRBuilder<>> get_builder();
+        llvm::Function * get_function(const std::string & id);
+        std::map<std::string, llvm::Value *> & get_arguments(const std::string & id);
+        std::shared_ptr<llvm::IRBuilder<>> get_builder(const std::string & id);
 
         std::map<std::string, llvm::Value *> local_variables;
 

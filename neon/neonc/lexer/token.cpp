@@ -1,6 +1,36 @@
 #include "token.h"
 
 namespace neonc {
+    namespace {
+        static const std::string escape_string(const std::string & input_string) {
+            std::ostringstream escaped_string;
+            for (char current_char : input_string) {
+                switch (current_char) {
+                    case '\n':
+                        escaped_string << "\\n";
+                        break;
+                    case '\t':
+                        escaped_string << "\\t";
+                        break;
+                    case '\r':
+                        escaped_string << "\\r";
+                        break;
+                    case '\\':
+                        escaped_string << "\\\\";
+                        break;
+                    case '\"':
+                        escaped_string << "\\\"";
+                        break;
+                    default:
+                        escaped_string << current_char;
+                        break;
+                }
+            }
+
+            return escaped_string.str();
+        }
+    }
+
     void Token::dump() const {
         auto v = value;
 
@@ -10,12 +40,6 @@ namespace neonc {
             return;
         }
 
-        if (v == "\n") {
-            v = "\\n";
-        } else if (v == "\t") {
-            v = "\\t";
-        }
-
-        std::cout << ColorCyan << token << ColorReset << " \"" << v << "\" " << position.string() << std::endl;
+        std::cout << ColorCyan << token << ColorReset << " \"" << escape_string(v) << "\" " << position.string() << std::endl;
     }
 }

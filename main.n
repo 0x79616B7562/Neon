@@ -1,15 +1,13 @@
 fn printf(fmt: str, d: ...i32) i32;
 
-fn test(a, b: i32) i32 {
-    return a * b
+fn ahoooooj() bool {
+    var ej: bool = true
+
+    return ej
 }
 
-fn main() i32 {
-    var a: i32 = 10
+fn main() {
+    var ahoj: str = "ahoj %d\n"
 
-    var t: i32 = printf("one: %d\n", a)
-
-    var s: i32 = printf("ahoj %d\n", test(10, 20))
-
-    return 0
+    printf(ahoj, ahoooooj())
 }
