@@ -28,14 +28,15 @@ namespace neonc {
         auto target = Target();
         auto module = target.create_module(std::string(entry));
 
-        ast.verify(module);
+        ast.verify();
         ast.dump();
         std::cout << std::endl;
         ast.build(module);
         ast.finalize(module);
 
-        module.dump();
         module.verify();
+        target.optimize(module);
+        module.dump();
 
         target.module_to_object_file(module, file_path);
 

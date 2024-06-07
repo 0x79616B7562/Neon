@@ -8,6 +8,10 @@ namespace neonc {
     struct Return : public Node {
         Return(const std::optional<Position> position): Node(position) {}
 
+        virtual NodeId id() const {
+            return NodeId::Return;
+        }
+        
         virtual void dump(const uint32_t indentation) const {
             std::cout << cli::indent(indentation) << cli::colorize("return ", indentation);
 

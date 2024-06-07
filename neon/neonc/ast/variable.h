@@ -19,6 +19,10 @@ namespace neonc {
             const std::optional<Position> position
         ): identifier(identifier), type(type), Node(position) {}
        
+        virtual NodeId id() const {
+            return NodeId::Variable;
+        }
+        
         virtual void dump(const uint32_t indentation) const {
             std::cout << cli::indent(indentation) << (declare ? cli::colorize("let ", indentation) : "_") << (declare ? identifier : "");
             std::cout << ": " << (type.has_value() ? type.value() : ColorRed + std::string("unknown") + ColorReset);

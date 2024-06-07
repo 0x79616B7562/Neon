@@ -23,6 +23,10 @@ namespace neonc {
             file_path = replace_all(replace_all(_file_path, "/", "::"), "\\", "::");
         }
 
+        virtual NodeId id() const {
+            return NodeId::Root;
+        }
+        
         virtual void dump(const uint32_t indentation) const {
             std::cout << cli::colorize("Root", indentation) << "<" << file_path << "> {" << "\n";
             

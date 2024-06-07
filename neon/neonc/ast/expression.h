@@ -13,6 +13,10 @@ namespace neonc {
     struct Expression : public Node {
         Expression(): Node(std::nullopt) {}
 
+        virtual NodeId id() const {
+            return NodeId::Expression;
+        }
+
         virtual void dump(const uint32_t indentation) const {
             std::cout << ColorGreen << BoldFont << "( " << ColorReset;
 

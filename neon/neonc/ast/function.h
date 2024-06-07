@@ -12,6 +12,10 @@ namespace neonc {
             const std::optional<Position> position
         ): identifier(identifier), Node(position) {}
 
+        virtual NodeId id() const {
+            return NodeId::Function;
+        }
+
         virtual void dump(const uint32_t indentation) const {
             std::cout << cli::indent(indentation) << cli::colorize("fn ", indentation) << identifier << "(";
 

@@ -11,6 +11,10 @@ namespace neonc {
             const std::optional<Position> position
         ): value(value), is_floating_point(is_floating_point), Node(position) {}
 
+        virtual NodeId id() const {
+            return NodeId::Number;    
+        }
+
         virtual void dump(const uint32_t indentation) const {
             std::cout << value;
         }

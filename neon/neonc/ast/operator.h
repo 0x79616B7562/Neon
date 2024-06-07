@@ -31,6 +31,10 @@ namespace neonc {
     struct Operator : public Node {
         Operator(op::Operator op): op(op), Node(std::nullopt) {}
 
+        virtual NodeId id() const {
+            return NodeId::Operator;
+        }
+        
         virtual void dump(const uint32_t indentation) const {
             switch (op) {
             case op::Operator::PLUS: std::cout << " + "; break;

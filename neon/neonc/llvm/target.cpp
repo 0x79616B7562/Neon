@@ -89,7 +89,14 @@ namespace neonc {
         return Module(context, llvm_module, target_cpu, target_features);
     }
 
-    void Target::module_to_object_file(Module module, const std::string out) const {
+    void Target::optimize(Module & module) {
+        // for (auto & func : module.module->getFunctionList()) {
+        //     pass->fpm->run(func, *pass->fam);
+        // }
+        // TODO: this segfaults for some reason
+    }
+
+    void Target::module_to_object_file(Module & module, const std::string out) const {
         std::error_code e;
         llvm::raw_fd_ostream dest(out + ".o", e, llvm::sys::fs::OF_None);
 

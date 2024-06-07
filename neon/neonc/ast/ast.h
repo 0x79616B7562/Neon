@@ -2,6 +2,7 @@
 
 #include "node.h"
 #include "root.h"
+#include "analyzer/analyzer.h"
 
 namespace neonc {
     class AbstractSyntaxTree {
@@ -10,7 +11,7 @@ namespace neonc {
 
         std::shared_ptr<Node> get_root_ptr();
         void dump() const;
-        void verify(Module & module);
+        void verify();
         void build(Module & module);
         void finalize(Module & module);
     private:

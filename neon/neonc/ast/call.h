@@ -8,6 +8,10 @@ namespace neonc {
     struct Call : public Node {
         Call(const std::string identifier, const std::optional<Position> position): identifier(identifier), Node(position) {}
 
+        virtual NodeId id() const {
+            return NodeId::Call;
+        }
+
         virtual void dump(const uint32_t indentation) const {
             std::cout << identifier << ColorYellow << "(" << ColorReset;
 

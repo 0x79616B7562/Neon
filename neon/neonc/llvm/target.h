@@ -11,7 +11,9 @@ namespace neonc {
 
         Module create_module(const std::string module_name) const;
 
-        void module_to_object_file(Module module, const std::string out) const;
+        void optimize(Module & module);
+
+        void module_to_object_file(Module & module, const std::string out) const;
     public:
         std::shared_ptr<Pass> pass;
     private:

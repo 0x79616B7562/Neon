@@ -9,7 +9,10 @@ namespace neonc {
         root->dump(0);
     }
 
-    void AbstractSyntaxTree::verify(Module & module) {
+    void AbstractSyntaxTree::verify() {
+        auto analyzer = Analyzer();
+
+        analyzer.analyze(get_root_ptr());
 
         verified = true;
     }

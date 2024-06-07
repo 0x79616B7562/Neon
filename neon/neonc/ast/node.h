@@ -8,9 +8,29 @@
 #define DEF_INDENT_MUL 4
 
 namespace neonc {
+    enum class NodeId {
+        None,
+
+        Root,
+
+        Expression,
+        Operator,
+        Boolean,
+        Call,
+        Number,
+        String,
+        Identifier,
+
+        Variable,
+        Function,
+        Return,
+    };
+
     struct Node {
         Node(const std::optional<Position> position): position(position) {}
         virtual ~Node() = default;
+
+        virtual NodeId id() const = 0;
 
         virtual void dump(const uint32_t indent) const = 0;
 

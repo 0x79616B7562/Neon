@@ -37,6 +37,10 @@ namespace neonc {
     struct String : public Node {
         String(const std::string string, const std::optional<Position> position): string(string), Node(position) {}
 
+        virtual NodeId id() const {
+            return NodeId::String;
+        }
+        
         virtual void dump(const uint32_t indentation) const {
             std::cout << "\"" << escape_string(string) << "\"";
         }
