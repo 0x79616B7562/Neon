@@ -42,6 +42,8 @@ namespace neonc {
         }
         
         virtual void dump(const uint32_t indentation) const {
+            (void)indentation;
+
             std::cout << "\"" << escape_string(string) << "\"";
         }
 

@@ -13,7 +13,7 @@ namespace neonc {
     public:
         Parser() = default;
 
-        const AbstractSyntaxTree parse_ast(const std::string file_name, std::vector<Token> tokens) const;
+        const AbstractSyntaxTree parse_ast(const std::string absolute_file_path, std::vector<Token> tokens) const;
     private:
     };
 }

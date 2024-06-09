@@ -36,6 +36,8 @@ namespace neonc {
         }
         
         virtual void dump(const uint32_t indentation) const {
+            (void)indentation;
+
             switch (op) {
             case op::Operator::PLUS: std::cout << " + "; break;
             case op::Operator::MINUS: std::cout << " - "; break;

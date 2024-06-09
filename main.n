@@ -6,8 +6,7 @@ fn ahoooooj() bool {
     return ej
 }
 
-fn main() {
+fn main() i32 {
     var ahoj: str = "ahoj %d\n"
-
-    var t: i32 = printf(ahoj, ahoooooj())
+    var t: i32 = printf("hey\n")
 }

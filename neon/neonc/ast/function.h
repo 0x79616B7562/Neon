@@ -26,14 +26,6 @@ namespace neonc {
                     std::cout << ", ";
             }
 
-            if (is_variadic) {
-                if (!arguments.empty())
-                    std::cout << ", ";
-
-                std::cout << variadic_identifier.value() << ": ...";
-                variadic_type->dump(indentation);
-            }
-
             std::cout << ") ";
 
             if (return_type) {
@@ -59,8 +51,15 @@ namespace neonc {
 
         void * build(Module & module) {
             std::vector<llvm::Type *> args;
+            bool is_variadic = false;
 
             for (auto & arg : arguments) {
+                if (arg.get_variadic()) {
+                    is_variadic = true;
+
+                    break;
+                }
+
                 auto _type_ = arg.get_type();
                 args.push_back((llvm::Type *)(_type_->build(module)));
             }
@@ -138,24 +137,8 @@ namespace neonc {
             is_declaration = _is_declaration;
         }
 
-        void set_variadic(bool _is_variadic) {
-            is_variadic = _is_variadic;
-        }
-        
-        void set_variadic_type(std::optional<Type> _variadic_type) {
-            variadic_type = _variadic_type;
-        }
-
-        void set_varadic_identifier(std::optional<std::string> _variadic_identifier) {
-            variadic_identifier = _variadic_identifier;
-        }
-
-        const Type get_variadic_type() const {
-            return variadic_type.value();
-        }
-
-        bool get_variadic() const {
-            return is_variadic;
+        const std::optional<Type> & get_return_type() const {
+            return return_type;
         }
 
         const std::string identifier;
@@ -165,9 +148,5 @@ namespace neonc {
         std::vector<Argument> arguments;
 
         bool is_declaration = false;
-
-        bool is_variadic = false;
-        std::optional<std::string> variadic_identifier = std::nullopt;
-        std::optional<Type> variadic_type = std::nullopt;
     };
 }

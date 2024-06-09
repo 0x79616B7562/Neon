@@ -13,7 +13,9 @@ namespace neonc {
             return NodeId::Type;
         }
 
-        virtual void dump(const uint32_t indent) const {
+        virtual void dump(const uint32_t indentation) const {
+            (void)indentation;
+
             if (data) std::cout << data.value();
             else std::cout << ColorRed << "unknown" << ColorReset;
         }

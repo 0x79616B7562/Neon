@@ -7,8 +7,7 @@
     auto & left = nodes[i - 2]; std::shared_ptr<Operator> op = std::dynamic_pointer_cast<Operator>(nodes[i - 1]); auto & right = nodes[i]; \
     if (ops) { auto result = std::make_shared<Expression>(); \
     result->nodes.push_back(left); result->nodes.push_back(op); result->nodes.push_back(right); \
-    nodes[i - 2] = result; nodes.erase(nodes.begin() + i - 1, nodes.begin() + i + 1); \
-    i -= 2; } }
+    nodes[i - 2] = result; nodes.erase(nodes.begin() + i - 1, nodes.begin() + i + 1); i -= 2; } }
 
 namespace neonc {
     const std::optional<Token> accept(Pack * pack, const TokenId to_find, const std::optional<TokenId> ignore, bool progress = true) {
@@ -85,17 +84,13 @@ namespace neonc {
     }
 
     bool parse_number(Pack * pack, Node * node) {
-        auto num = accept(pack, TokenId::NUMBER, TokenId::NEWLINE);
-
-        if (num) {
+        if (auto num = accept(pack, TokenId::NUMBER, TokenId::NEWLINE); num) {
             node->add_node<Number>(num->value, false, num->position);
 
             return true;
         }
 
-        auto fnum = accept(pack, TokenId::FLOATING_NUMBER, TokenId::NEWLINE);
-
-        if (fnum) {
+        if (auto fnum = accept(pack, TokenId::FLOATING_NUMBER, TokenId::NEWLINE); fnum) {
             node->add_node<Number>(fnum->value, true, fnum->position);
             
             return true;
@@ -105,17 +100,13 @@ namespace neonc {
     }
 
     bool parse_boolean(Pack * pack, Node * node) {
-        auto _true = accept(pack, TokenId::TRUE, TokenId::NEWLINE);
-
-        if (_true) {
+        if (auto _true = accept(pack, TokenId::TRUE, TokenId::NEWLINE); _true) {
             node->add_node<Boolean>(true, _true->position);
 
             return true;
         }
 
-        auto _false = accept(pack, TokenId::FALSE, TokenId::NEWLINE);
-        
-        if (_false) {
+        if (auto _false = accept(pack, TokenId::FALSE, TokenId::NEWLINE); _false) {
             node->add_node<Boolean>(false, _false->position);
 
             return true;
@@ -151,9 +142,7 @@ namespace neonc {
     }
 
     bool parse_string(Pack * pack, Node * node) {
-        auto str = accept(pack, TokenId::STRING, TokenId::NEWLINE);
-
-        if (str) {
+        if (auto str = accept(pack, TokenId::STRING, TokenId::NEWLINE); str) {
             std::string _str = str->value;
 
             node->add_node<String>(str->value, str->position);
@@ -387,8 +376,6 @@ namespace neonc {
                     expect(pack, TokenId::DOT, TokenId::NEWLINE, "expected '...'");
                     expect(pack, TokenId::DOT, TokenId::NEWLINE, "expected '...'");
 
-                    func->set_variadic(true);
-
                     auto _type = parse_type(pack);
                     
                     if (!_type) {
@@ -396,9 +383,10 @@ namespace neonc {
                     
                         return false;
                     }
-
-                    func->set_varadic_identifier(ident->value);
-                    func->set_variadic_type(_type);
+    
+                    auto vaarg = Argument(ident->value, _type, _type->position);
+                    vaarg.set_variadic(true);
+                    args.push_back(vaarg);
 
                     accept(pack, TokenId::COMMA, TokenId::NEWLINE);
 
@@ -422,7 +410,7 @@ namespace neonc {
                 break;
         }
 
-        for (int32_t i = args.size(); i >= 0; i--) {
+        for (int32_t i = args.size(); i >= 0; i--) { // propagate types from right to left
             if (i == int32_t(args.size()) - 1 && !args[i].get_type().has_value()) {
                 throw_parse_error_at_position(pack, args[i].get_position().value(), "argument has no type");
             } else if (i < int32_t(args.size())) {

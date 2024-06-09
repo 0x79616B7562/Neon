@@ -11,7 +11,9 @@ namespace neonc {
             return NodeId::Boolean;
         }
 
-        virtual void dump(const uint32_t indent) const {
+        virtual void dump(const uint32_t indentation) const {
+            (void)indentation;
+
             std::cout << (value ? "true" : "false");
         }
  

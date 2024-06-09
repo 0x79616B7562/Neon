@@ -38,10 +38,14 @@ namespace neonc {
         virtual void dump(const uint32_t indentation) const = 0;
 
         virtual void * build(Module & module) {
+            (void)module;
+
             return nullptr;
         }
 
-        virtual void finalize(Module & module) {}
+        virtual void finalize(Module & module) {
+            (void)module;
+        }
 
         template<typename T, typename ... Args>
         std::shared_ptr<T> add_node(Args ... args) {

@@ -19,16 +19,18 @@ namespace neonc {
         }
 
         virtual void dump(const uint32_t indentation) const {
+            (void)indentation;
+
             std::cout << identifier << ": ";
-            if (type) type->dump(indentation);
+            if (type) { if (is_variadic) std::cout << "..."; type->dump(indentation); }
             else std::cout << ColorRed << "unknown" << ColorReset;
         }
 
-        const std::optional<Type> get_type() const {
+        const std::optional<Type> & get_type() const {
             return type;
         }
 
-        const std::optional<Position> get_position() const {
+        const std::optional<Position> & get_position() const {
             return position;
         }
 
@@ -36,11 +38,21 @@ namespace neonc {
             return identifier;
         }
 
+        bool get_variadic() const {
+            return is_variadic;
+        }
+
         void set_type(const std::optional<Type> _type) {
             type = _type;
+        }
+
+        void set_variadic(bool _is_variadic) {
+            is_variadic = _is_variadic;
         }
     private:
         std::string identifier;
         std::optional<Type> type = std::nullopt;
+
+        bool is_variadic = false;
     };
 }

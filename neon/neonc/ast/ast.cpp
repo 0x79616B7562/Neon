@@ -1,5 +1,7 @@
 #include "ast.h"
 
+#include "analyzer/analyzer.h"
+
 namespace neonc {
     std::shared_ptr<Node> AbstractSyntaxTree::get_root_ptr() {
         return root;
@@ -10,6 +12,9 @@ namespace neonc {
     }
 
     void AbstractSyntaxTree::verify() {
+        auto analyzer = Analyzer(absolute_file_path);
+
+        analyzer.analyze(get_root_ptr());
 
         verified = true;
     }
