@@ -9,5 +9,5 @@ fn ahoooooj() bool {
 fn main() {
     var ahoj: str = "ahoj %d\n"
 
-    printf(ahoj, ahoooooj())
+    var t: i32 = printf(ahoj, ahoooooj())
 }

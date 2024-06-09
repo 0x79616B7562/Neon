@@ -4,6 +4,7 @@
 #include "err.h"
 #include "pack.h"
 #include "../ast/node.h"
+#include "../ast/type.h"
 #include "../ast/function.h"
 #include "../ast/variable.h"
 #include "../ast/expression.h"
@@ -16,7 +17,7 @@
 #include "../ast/return.h"
 
 namespace neonc {
-    const std::optional<Token> parse_type(Pack * pack);
+    const std::optional<Type> parse_type(Pack * pack);
 
     void evaluate_expression(Node * node);
 

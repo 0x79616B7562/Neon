@@ -70,7 +70,7 @@ namespace neonc {
 
     //
 
-    const std::optional<Token> parse_type(Pack * pack) {
+    const std::optional<Type> parse_type(Pack * pack) {
         auto _type = accept(pack, TokenId::IDENT, TokenId::NEWLINE);
 
         std::string __type = "";
@@ -78,14 +78,10 @@ namespace neonc {
         if (_type) {
             __type += _type->value;
         } else {
-            return {};
+            return std::nullopt;
         }
 
-        return Token {
-            .token = TokenId::IDENT,
-            .value = __type,
-            .position = _type->position
-        };
+        return Type(__type, _type->position);
     }
 
     bool parse_number(Pack * pack, Node * node) {
@@ -351,7 +347,7 @@ namespace neonc {
                 return false;
             }
 
-            auto var = node->add_node<Variable>(ident->value, _type->value, _var->position);
+            auto var = node->add_node<Variable>(ident->value, _type, _var->position);
 
             if (accept(pack, TokenId::EQUALS, TokenId::NEWLINE)) {
                 if (!parse_expression(pack, var.get())) {
@@ -402,7 +398,9 @@ namespace neonc {
                     }
 
                     func->set_varadic_identifier(ident->value);
-                    func->set_variadic_type(_type->value);
+                    func->set_variadic_type(_type);
+
+                    accept(pack, TokenId::COMMA, TokenId::NEWLINE);
 
                     break;
                 }
@@ -415,7 +413,7 @@ namespace neonc {
                     return false;
                 }
 
-                args.push_back(Argument(ident->value, _type->value, ident->position));
+                args.push_back(Argument(ident->value, _type, ident->position));
             } else {
                 args.push_back(Argument(ident->value, std::nullopt, ident->position));
             }
@@ -451,10 +449,8 @@ namespace neonc {
 
         expect(pack, TokenId::RPAREN, TokenId::NEWLINE, "expected ')'");
 
-        auto ret_type = accept(pack, TokenId::IDENT, TokenId::NEWLINE);
-
-        if (ret_type)
-            func->set_return_type(ret_type->value);
+        if (auto ret_type = parse_type(pack); ret_type)
+            func->set_return_type(ret_type);
 
         if (accept(pack, TokenId::SEMICOLON, TokenId::NEWLINE)) {
             func->set_is_declaration(true);

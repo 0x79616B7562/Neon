@@ -31,44 +31,34 @@ namespace neonc {
             std::optional<std::shared_ptr<Operator>> op = std::nullopt;
 
             for (auto & n : nodes) {
-                auto expr = std::dynamic_pointer_cast<Expression>(n);
-
-                if (expr) {
+                if (auto expr = std::dynamic_pointer_cast<Expression>(n); expr) {
                     auto _value = expr->build(module, type);
                     value = op.has_value() ? op->get()->build(module, value, _value, type) : _value;
 
                     continue;
                 }
 
-                auto _op = std::dynamic_pointer_cast<Operator>(n);
-
-                if (_op) {
+                if (auto _op = std::dynamic_pointer_cast<Operator>(n); _op) {
                     op = _op;
 
                     continue;
                 }
 
-                auto num = std::dynamic_pointer_cast<Number>(n);
-
-                if (num) {
+                if (auto num = std::dynamic_pointer_cast<Number>(n); num) {
                     auto _value = num->build(module, type);
                     value = op.has_value() ? op->get()->build(module, value, _value, type) : _value;
                     
                     continue;
                 }
 
-                auto boolean = std::dynamic_pointer_cast<Boolean>(n);
-
-                if (boolean) {
+                if (auto boolean = std::dynamic_pointer_cast<Boolean>(n); boolean) {
                     auto _value = (llvm::Value *)boolean->build(module);
                     value = op.has_value() ? op->get()->build(module, value, _value, type) : _value;
 
                     continue;
                 }
 
-                auto identifier = std::dynamic_pointer_cast<Identifier>(n);
-
-                if (identifier) {
+                if (auto identifier = std::dynamic_pointer_cast<Identifier>(n); identifier) {
                     if (module.local_variables.contains(identifier->identifier)) {
                         auto _value = module.get_builder()->CreateLoad(type, module.local_variables[identifier->identifier]);
                         value = op.has_value() ? op->get()->build(module, value, _value, type) : _value;
@@ -82,15 +72,11 @@ namespace neonc {
                     continue;
                 }
 
-                auto call = std::dynamic_pointer_cast<Call>(n);
-
-                if (call) {
+                if (auto call = std::dynamic_pointer_cast<Call>(n); call) {
                     std::vector<llvm::Value *> args;
 
                     for (uint32_t i = 0; i < call->nodes.size(); i++) {
-                        auto expr = std::dynamic_pointer_cast<Expression>(call->nodes[i]);
-
-                        if (expr) {
+                        if (auto expr = std::dynamic_pointer_cast<Expression>(call->nodes[i]); expr) {
                             args.push_back(expr->build(module, module.module->getFunction(call->identifier)->getArg(i)->getType()));
                         }
 
@@ -114,9 +100,7 @@ namespace neonc {
                     continue;
                 }
 
-                auto string = std::dynamic_pointer_cast<String>(n);
-
-                if (string) {
+                if (auto string = std::dynamic_pointer_cast<String>(n); string) {
                     value = (llvm::Value *)string->build(module);
 
                     continue;

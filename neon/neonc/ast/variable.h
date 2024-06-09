@@ -2,20 +2,19 @@
 
 #include "node.h"
 #include <neonc.h>
-#include "../llvm/util/str_to_type.h"
 #include "expression.h"
 #include "ast.h"
+#include "type.h"
 
 namespace neonc {
     struct Variable : public Node {
         Variable(): Node(std::nullopt) {
-            type = "i32"; // TODO: REMOVE
             declare = false;
         }
 
         Variable(
             const std::string identifier,
-            const std::optional<std::string> type,
+            const std::optional<Type> type,
             const std::optional<Position> position
         ): identifier(identifier), type(type), Node(position) {}
        
@@ -25,7 +24,10 @@ namespace neonc {
         
         virtual void dump(const uint32_t indentation) const {
             std::cout << cli::indent(indentation) << (declare ? cli::colorize("let ", indentation) : "_") << (declare ? identifier : "");
-            std::cout << ": " << (type.has_value() ? type.value() : ColorRed + std::string("unknown") + ColorReset);
+
+            std::cout << ": ";
+            if (type) type->dump(indentation);
+            else std::cout << ColorRed << "unknown" << ColorReset;
 
             if (!nodes.empty()) {
                 std::cout << " = ";
@@ -38,7 +40,7 @@ namespace neonc {
         }
 
         void * build(Module & module) {
-            auto _type = str_to_type(module, type.value());
+            auto _type = (llvm::Type *)type.value().build(module);
             
             if (declare) {
                 auto alloca = module.get_builder()->CreateAlloca(_type);
@@ -46,9 +48,7 @@ namespace neonc {
                 module.local_variables[identifier] = alloca;
 
                 if (!nodes.empty()) {
-                    auto expr = std::dynamic_pointer_cast<Expression>(nodes.back());
-        
-                    if (expr) {
+                    if (auto expr = std::dynamic_pointer_cast<Expression>(nodes.back()); expr) {
                         auto built = expr->build(module, _type);
 
                         if (built == nullptr)
@@ -74,9 +74,7 @@ namespace neonc {
                 }
             } else {
                 if (!nodes.empty()) {
-                    auto expr = std::dynamic_pointer_cast<Expression>(nodes.back());
-
-                    if (expr) {
+                    if (auto expr = std::dynamic_pointer_cast<Expression>(nodes.back()); expr) {
                         expr->build(module, _type);
                     }
                 }
@@ -86,7 +84,7 @@ namespace neonc {
         }
 
         const std::string identifier;
-        std::optional<std::string> type;
+        std::optional<Type> type;
     private:
         bool declare = true;
     };

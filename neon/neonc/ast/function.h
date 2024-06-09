@@ -1,9 +1,9 @@
 #pragma once
 
+#include "type.h"
 #include "node.h"
 #include <neonc.h>
 #include "argument.h"
-#include "../llvm/util/str_to_type.h"
 
 namespace neonc {
     struct Function : public Node {
@@ -20,7 +20,7 @@ namespace neonc {
             std::cout << cli::indent(indentation) << cli::colorize("fn ", indentation) << identifier << "(";
 
             for (uint32_t i = 0; i < arguments.size(); i++) {
-                arguments[i].dump();
+                arguments[i].dump(indentation);
 
                 if (i < arguments.size() - 1)
                     std::cout << ", ";
@@ -30,13 +30,16 @@ namespace neonc {
                 if (!arguments.empty())
                     std::cout << ", ";
 
-                std::cout << variadic_identifier.value() << ": ..." << variadic_type.value();
+                std::cout << variadic_identifier.value() << ": ...";
+                variadic_type->dump(indentation);
             }
 
             std::cout << ") ";
 
-            if (return_type)
-                std::cout << return_type.value() << " ";
+            if (return_type) {
+                return_type->dump(indentation);
+                std::cout << " ";
+            }
 
             if (is_declaration) {
                 std::cout << ";" << std::endl;
@@ -58,12 +61,13 @@ namespace neonc {
             std::vector<llvm::Type *> args;
 
             for (auto & arg : arguments) {
-                args.push_back(str_to_type(module, arg.get_type().value()));
+                auto _type_ = arg.get_type();
+                args.push_back((llvm::Type *)(_type_->build(module)));
             }
 
             auto func_type = llvm::FunctionType::get(
-                identifier == "main" ? str_to_type(module, "i32") :
-                return_type ? str_to_type(module, return_type.value()) : llvm::Type::getVoidTy(*module.context),
+                identifier == "main" ? (llvm::Type *)Type("i32", std::nullopt).build(module) :
+                return_type ? (llvm::Type *)return_type->build(module) : llvm::Type::getVoidTy(*module.context),
                 args,
                 is_variadic
             );
@@ -126,7 +130,7 @@ namespace neonc {
             arguments.insert(arguments.end(), _args.begin(), _args.end());
         }
 
-        void set_return_type(std::optional<std::string> _return_type) {
+        void set_return_type(std::optional<Type> _return_type) {
             return_type = _return_type;
         }
 
@@ -138,7 +142,7 @@ namespace neonc {
             is_variadic = _is_variadic;
         }
         
-        void set_variadic_type(std::optional<std::string> _variadic_type) {
+        void set_variadic_type(std::optional<Type> _variadic_type) {
             variadic_type = _variadic_type;
         }
 
@@ -146,7 +150,7 @@ namespace neonc {
             variadic_identifier = _variadic_identifier;
         }
 
-        const std::string get_variadic_type() const {
+        const Type get_variadic_type() const {
             return variadic_type.value();
         }
 
@@ -156,12 +160,14 @@ namespace neonc {
 
         const std::string identifier;
     private:
-        std::optional<std::string> return_type = std::nullopt;
+        std::optional<Type> return_type = std::nullopt;
+
         std::vector<Argument> arguments;
+
         bool is_declaration = false;
 
         bool is_variadic = false;
         std::optional<std::string> variadic_identifier = std::nullopt;
-        std::optional<std::string> variadic_type = std::nullopt;
+        std::optional<Type> variadic_type = std::nullopt;
     };
 }

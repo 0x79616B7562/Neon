@@ -21,6 +21,9 @@ namespace neonc {
         String,
         Identifier,
 
+        Argument,
+        Type,
+
         Variable,
         Function,
         Return,
@@ -32,7 +35,7 @@ namespace neonc {
 
         virtual NodeId id() const = 0;
 
-        virtual void dump(const uint32_t indent) const = 0;
+        virtual void dump(const uint32_t indentation) const = 0;
 
         virtual void * build(Module & module) {
             return nullptr;

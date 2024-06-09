@@ -11,7 +11,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DNDEBUG")
 
 ### LLVM
 
-find_package(LLVM REQUIRED CONFIG)
+find_package(LLVM REQUIRED CONFIG PATHS ${PROJECT_SOURCE_DIR}/build/debug/llvm/build/debug/llvm/installed)
 
 message(STATUS "LLVM version: ${LLVM_PACKAGE_VERSION}")
 message(STATUS "LLVMConfig.cmake path: ${LLVM_DIR}")

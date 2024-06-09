@@ -2,7 +2,6 @@
 
 #include "node.h"
 #include "root.h"
-#include "analyzer/analyzer.h"
 
 namespace neonc {
     class AbstractSyntaxTree {

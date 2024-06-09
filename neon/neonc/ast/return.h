@@ -23,9 +23,7 @@ namespace neonc {
 
         void * build(Module & module) {
             if (!nodes.empty()) {
-                auto expr = std::dynamic_pointer_cast<Expression>(nodes.back());
-
-                if (expr) {
+                if (auto expr = std::dynamic_pointer_cast<Expression>(nodes.back()); expr) {
                     auto value = expr->build(module, module.get_function()->getReturnType());
 
                     module.get_builder()->CreateRet(value);

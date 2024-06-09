@@ -41,9 +41,7 @@ namespace neonc {
                 n->build(module);
 
             for (auto & n : nodes) { // build insides
-                std::shared_ptr<Function> func = std::dynamic_pointer_cast<Function>(n);    
-            
-                if (func) {
+                if (std::shared_ptr<Function> func = std::dynamic_pointer_cast<Function>(n); func) {
                     module.pointer = func->identifier;
                     
                     for (auto & _n : n->nodes)

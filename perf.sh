@@ -4,4 +4,3 @@ perf record -g ./build/debug/neon/neon main.n
 perf script > trace.perf
 FlameGraph/stackcollapse-perf.pl trace.perf > trace.folded
 FlameGraph/flamegraph.pl trace.folded > trace.svg
-firefox trace.svg

@@ -3,20 +3,28 @@
 #include <neonc.h>
 #include "../types/position.h"
 #include "../util/clicolor.h"
+#include "node.h"
+#include "type.h"
 
 namespace neonc {
-    struct Argument {
+    struct Argument : public Node {
         Argument(
             const std::string identifier,
-            const std::optional<std::string> type,
+            const std::optional<Type> type,
             const std::optional<Position> position
-        ): identifier(identifier), type(type), position(position) {}
-        
-        void dump() const {
-            std::cout << identifier << ": " << (type.has_value() ? type.value() : ColorRed + std::string("unknown") + ColorReset);
+        ): identifier(identifier), type(type), Node(position) {}
+       
+        virtual NodeId id() const {
+            return NodeId::Argument;
         }
 
-        const std::optional<std::string> get_type() const {
+        virtual void dump(const uint32_t indentation) const {
+            std::cout << identifier << ": ";
+            if (type) type->dump(indentation);
+            else std::cout << ColorRed << "unknown" << ColorReset;
+        }
+
+        const std::optional<Type> get_type() const {
             return type;
         }
 
@@ -28,12 +36,11 @@ namespace neonc {
             return identifier;
         }
 
-        void set_type(const std::optional<std::string> _type) {
+        void set_type(const std::optional<Type> _type) {
             type = _type;
         }
     private:
         std::string identifier;
-        std::optional<std::string> type = std::nullopt;
-        std::optional<Position> position;
+        std::optional<Type> type = std::nullopt;
     };
 }
