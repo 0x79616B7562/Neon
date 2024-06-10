@@ -17,7 +17,11 @@ namespace neonc {
         }
 
         virtual void dump(const uint32_t indentation) const {
-            std::cout << cli::indent(indentation) << cli::colorize("fn ", indentation) << identifier << "(";
+            std::cout << cli::indent(indentation)
+                << cli::colorize((is_public ? "pub " : ""), indentation)
+                << cli::colorize("fn ", indentation)
+                << identifier
+                << "(";
 
             for (uint32_t i = 0; i < arguments.size(); i++) {
                 arguments[i].dump(indentation);
@@ -65,7 +69,7 @@ namespace neonc {
             }
 
             auto func_type = llvm::FunctionType::get(
-                identifier == "main" ? (llvm::Type *)Type("i32", std::nullopt).build(module) :
+                identifier == "main" && !return_type ? llvm::Type::getInt32Ty(*module.context) :
                 return_type ? (llvm::Type *)return_type->build(module) : llvm::Type::getVoidTy(*module.context),
                 args,
                 is_variadic
@@ -73,7 +77,7 @@ namespace neonc {
 
             auto func = llvm::Function::Create(
                 func_type,
-                llvm::Function::ExternalLinkage,
+                is_public ? llvm::Function::ExternalLinkage : llvm::Function::PrivateLinkage,
                 identifier,
                 *module.module
             );
@@ -110,8 +114,8 @@ namespace neonc {
         }
 
         void finalize(Module & module) {
-            if (identifier == "main") {
-                module.get_builder(identifier)->CreateRet(module.get_builder()->getInt32(0));
+            if (identifier == "main" && !return_type) {
+                module.get_builder(identifier)->CreateRet(module.get_builder(identifier)->getInt32(0));
 
                 return;
             }
@@ -137,8 +141,20 @@ namespace neonc {
             is_declaration = _is_declaration;
         }
 
+        void set_public(bool _is_public) {
+            is_public = _is_public;
+        }
+
         const std::optional<Type> & get_return_type() const {
             return return_type;
+        }
+
+        bool get_public() const {
+            return is_public;
+        }
+
+        uint32_t arguments_size() const {
+            return arguments.size();
         }
 
         const std::string identifier;
@@ -147,6 +163,7 @@ namespace neonc {
 
         std::vector<Argument> arguments;
 
+        bool is_public = false;
         bool is_declaration = false;
     };
 }

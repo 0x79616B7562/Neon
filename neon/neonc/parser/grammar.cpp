@@ -426,10 +426,14 @@ namespace neonc {
     }
 
     bool parse_function(Pack * pack, Node * node) {
+        auto pub = accept(pack, TokenId::PUB, TokenId::NEWLINE);
         auto fntok = expect(pack, TokenId::FN, TokenId::NEWLINE, "expected 'fn'");
         auto ident = expect(pack, TokenId::IDENT, TokenId::NEWLINE, "expected identifier");
  
         auto func = node->add_node<Function>(ident->value, fntok->position);
+
+        if (pub)
+            func->set_public(true);
 
         expect(pack, TokenId::LPAREN, TokenId::NEWLINE, "expected '('");
 
@@ -462,7 +466,10 @@ namespace neonc {
             pack->next();
         } else if (pack->get().token == TokenId::RBRACE) {
             return false;
-        } else if (accept(pack, TokenId::FN, TokenId::NEWLINE, false)) {
+        } else if (
+            accept(pack, TokenId::FN, TokenId::NEWLINE, false)
+            || accept(pack, TokenId::PUB, TokenId::NEWLINE, false)
+        ) {
             if (!parse_function(pack, node)) return false;
         } else if (accept(pack, TokenId::VAR, TokenId::NEWLINE, false)) {
             if (!parse_variable(pack, node)) return false;

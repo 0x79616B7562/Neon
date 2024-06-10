@@ -1,12 +1,5 @@
-fn printf(fmt: str, d: ...i32) i32;
+pub fn printf(fmt: str, d: ...i32) i32;
 
-fn ahoooooj() bool {
-    var ej: bool = true
-
-    return ej
-}
-
-fn main() i32 {
-    var ahoj: str = "ahoj %d\n"
-    var t: i32 = printf("hey\n")
+pub fn main() {
+    var t = 10 + 10
 }

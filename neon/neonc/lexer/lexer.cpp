@@ -66,6 +66,7 @@ namespace neonc {
         cmp("true", TokenId::TRUE)
         cmp("false", TokenId::FALSE)
         cmp("return", TokenId::RET)
+        cmp("pub", TokenId::PUB)
 
         return TokenId::IDENT;
     }

@@ -14,7 +14,8 @@ namespace neonc {
     void AbstractSyntaxTree::verify() {
         auto analyzer = Analyzer(absolute_file_path);
 
-        analyzer.analyze(get_root_ptr());
+        if (!analyzer.analyze(get_root_ptr()))
+            exit(0);
 
         verified = true;
     }

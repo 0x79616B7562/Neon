@@ -15,6 +15,7 @@ namespace neonc {
         VAR,
         FN,
         RET,
+        PUB,
 
         TRUE,
         FALSE,

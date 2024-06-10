@@ -11,6 +11,7 @@ namespace neonc {
             case TokenId::VAR: return os << "VAR";
             case TokenId::FN: return os << "FN";
             case TokenId::RET: return os << "RETURN";
+            case TokenId::PUB: return os << "PUBLIC";
             case TokenId::COLON: return os << "COLON";
             case TokenId::EQUALS: return os << "EQUALS";
             case TokenId::SEMICOLON: return os << "SEMICOLON";
