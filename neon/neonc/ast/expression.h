@@ -27,6 +27,11 @@ namespace neonc {
         }
 
         llvm::Value * build(Module & module, llvm::Type * type) {
+            if (type == nullptr) {
+                std::cerr << "ICE: expression.h type is nullptr" << std::endl;
+                exit(0);
+            }
+
             llvm::Value * value = nullptr;
             std::optional<std::shared_ptr<Operator>> op = std::nullopt;
 
@@ -39,6 +44,11 @@ namespace neonc {
                 }
 
                 if (auto _op = std::dynamic_pointer_cast<Operator>(n); _op) {
+                    if (type == llvm::Type::getVoidTy(*module.context)) {
+                        std::cerr << "ICE: operation on void type" << std::endl;
+                        exit(0);
+                    }
+
                     op = _op;
 
                     continue;
@@ -89,6 +99,7 @@ namespace neonc {
                             auto expr = std::dynamic_pointer_cast<Expression>(call->nodes[i]);
 
                             if (expr) {
+                                // TODO: get vaarg type
                                 args.push_back(expr->build(module, llvm::Type::getInt32Ty(*module.context)));
                             }
                         }

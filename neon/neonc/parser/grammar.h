@@ -33,5 +33,5 @@ namespace neonc {
     bool parse_function_arguments(Pack * pack, std::shared_ptr<Function> node);
     bool parse_function(Pack * pack, Node * node);
 
-    void parse(Pack * pack, std::shared_ptr<Node> node, bool iterate = true);
+    void parse(Pack * pack, std::shared_ptr<Node> node);
 }

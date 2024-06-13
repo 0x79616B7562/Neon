@@ -1,7 +1,7 @@
 #include "err.h"
 
 namespace neonc {
-    void throw_error(const std::string absolute_file_path, const std::optional<Position> position, const char * message) {
+    void _throw_error(const std::string absolute_file_path, const std::optional<Position> position, const char * message) {
         if (!position) {
             std::cerr << "ICE: position has no value in analyzer::err" << std::endl;
             exit(0);

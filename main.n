@@ -1,5 +1,11 @@
 pub fn printf(fmt: str, d: ...i32) i32;
 
-pub fn main() {
-    var t = 10 + 10
+fn test(a: ...i32) {
+}
+
+fn main() {
+    var b = 10
+    test(10, 20)
+
+    printf("hodnota: %d\n", b)
 }

@@ -1,6 +1,17 @@
 #include "query.h"
 
 namespace neonc {
+    std::optional<std::shared_ptr<Node>> query_first(std::shared_ptr<Node> node, NodeId id) {
+        if (node->id() == id)
+            return node;
+
+        for (auto n : node->nodes)
+            if (auto result = query_first(n, id); result)
+                return result;
+
+        return std::nullopt;
+    }
+
     std::vector<std::shared_ptr<Node>> query(std::shared_ptr<Node> node, NodeId id) {
         std::vector<std::shared_ptr<Node>> nodes = {};
 

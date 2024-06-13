@@ -1,7 +1,7 @@
 #include "grammar.h"
 
-#define CHECK_NEWLINE_OR_SEMICOLON if (!accept(pack, TokenId::NEWLINE, {}).has_value()) { \
-    if (!accept(pack, TokenId::SEMICOLON, {})) { throw_parse_error(pack, "expected new line or semicolon"); } }
+#define CHECK_NEWLINE_OR_SEMICOLON if (!accept(pack, TokenId::NEWLINE, std::nullopt).has_value()) { \
+    if (!accept(pack, TokenId::SEMICOLON, std::nullopt)) { throw_parse_error(pack, "expected new line or semicolon"); } }
 
 #define PRECEDENCE_SORT(ops) for (unsigned long int i = 2; i < nodes.size(); i += 2) { \
     auto & left = nodes[i - 2]; std::shared_ptr<Operator> op = std::dynamic_pointer_cast<Operator>(nodes[i - 1]); auto & right = nodes[i]; \
@@ -9,7 +9,7 @@
     result->nodes.push_back(left); result->nodes.push_back(op); result->nodes.push_back(right); \
     nodes[i - 2] = result; nodes.erase(nodes.begin() + i - 1, nodes.begin() + i + 1); i -= 2; } }
 
-namespace neonc {
+namespace neonc { 
     const std::optional<Token> accept(Pack * pack, const TokenId to_find, const std::optional<TokenId> ignore, bool progress = true) {
         for (std::size_t i = pack->index; i < std::size(pack->tokens); i++) {
             Token tok = pack->tokens[i];
@@ -41,6 +41,45 @@ namespace neonc {
         }
 
         return result;
+    }
+
+    inline static bool parse_body(Pack * pack, Node * node) {
+        if (pack->get().token == TokenId::ENDOFFILE) {
+            return false; 
+        } else if (accept(pack, TokenId::NEWLINE, {}, false) || accept(pack, TokenId::SEMICOLON, {}, false)) {
+            pack->next();
+        } else if (pack->get().token == TokenId::RBRACE) {
+            return false;
+        } else if (accept(pack, TokenId::VAR, TokenId::NEWLINE, false)) {
+            if (!parse_variable(pack, node)) return false;
+        } else if (accept(pack, TokenId::RET, TokenId::NEWLINE, false)) {
+            if (!parse_return(pack, node)) return false;
+        } else if (parse_standalone_expression(pack, node)) {
+            // nothing to do
+        } else {
+            throw_parse_error(pack, "unexpected");
+        } 
+
+        return true;
+    }
+
+    inline static bool __parse(Pack * pack, Node * node) {
+        if (pack->get().token == TokenId::ENDOFFILE) {
+            return false;
+        } else if (accept(pack, TokenId::NEWLINE, {}, false) || accept(pack, TokenId::SEMICOLON, {}, false)) {
+            pack->next();
+        } else if (pack->get().token == TokenId::RBRACE) {
+            return false;
+        } else if (
+            accept(pack, TokenId::FN, TokenId::NEWLINE, false)
+            || accept(pack, TokenId::PUB, TokenId::NEWLINE, false)
+        ) {
+            if (!parse_function(pack, node)) return false;
+        } else {
+            throw_parse_error(pack, "unexpected");
+        }
+
+        return true;
     }
 
     void evaluate_expression(Node * node) {
@@ -84,14 +123,16 @@ namespace neonc {
     }
 
     bool parse_number(Pack * pack, Node * node) {
+        auto neg = accept(pack, TokenId::MINUS, std::nullopt);
+
         if (auto num = accept(pack, TokenId::NUMBER, TokenId::NEWLINE); num) {
-            node->add_node<Number>(num->value, false, num->position);
+            node->add_node<Number>((neg ? "-" : "") + num->value, false, num->position);
 
             return true;
         }
 
         if (auto fnum = accept(pack, TokenId::FLOATING_NUMBER, TokenId::NEWLINE); fnum) {
-            node->add_node<Number>(fnum->value, true, fnum->position);
+            node->add_node<Number>((neg ? "-" : "") + fnum->value, true, fnum->position);
             
             return true;
         }
@@ -412,8 +453,13 @@ namespace neonc {
 
         for (int32_t i = args.size(); i >= 0; i--) { // propagate types from right to left
             if (i == int32_t(args.size()) - 1 && !args[i].get_type().has_value()) {
+            __no_type:
                 throw_parse_error_at_position(pack, args[i].get_position().value(), "argument has no type");
             } else if (i < int32_t(args.size())) {
+                if (args[i + 1].get_variadic() && !args[i].get_type()) {
+                    goto __no_type;
+                }
+
                 if (!args[i].get_type()) {
                     args[i].set_type(args[i + 1].get_type());
                 }
@@ -452,47 +498,18 @@ namespace neonc {
 
         expect(pack, TokenId::LBRACE, TokenId::NEWLINE, "expected '{'");
 
-        parse(pack, func);
+        while (parse_body(pack, func.get()));
 
         expect(pack, TokenId::RBRACE, TokenId::NEWLINE, "expected '}'");
 
         return true;
     }
-
-    inline static bool __parse(Pack * pack, Node * node) {
-        if (pack->get().token == TokenId::ENDOFFILE) {
-            return false;
-        } else if (accept(pack, TokenId::NEWLINE, {}, false) || accept(pack, TokenId::SEMICOLON, {}, false)) {
-            pack->next();
-        } else if (pack->get().token == TokenId::RBRACE) {
-            return false;
-        } else if (
-            accept(pack, TokenId::FN, TokenId::NEWLINE, false)
-            || accept(pack, TokenId::PUB, TokenId::NEWLINE, false)
-        ) {
-            if (!parse_function(pack, node)) return false;
-        } else if (accept(pack, TokenId::VAR, TokenId::NEWLINE, false)) {
-            if (!parse_variable(pack, node)) return false;
-        } else if (accept(pack, TokenId::RET, TokenId::NEWLINE, false)) {
-            if (!parse_return(pack, node)) return false;
-        } else if (parse_standalone_expression(pack, node)) {
-            // nothing to do
-        } else {
-            throw_parse_error(pack, "unexpected");
-        }
-
-        return true;
-    }
-
-    void parse(Pack * pack, std::shared_ptr<Node> node, bool iterate) {
-        if (iterate) {
-            while (true) {
-                if (!__parse(pack, node.get())) {
-                    break;
-                }
+ 
+    void parse(Pack * pack, std::shared_ptr<Node> node) {
+        while (true) {
+            if (!__parse(pack, node.get())) {
+                break;
             }
-        } else {
-            __parse(pack, node.get());
         }
     }
 }

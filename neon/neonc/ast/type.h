@@ -17,7 +17,7 @@ namespace neonc {
             (void)indentation;
 
             if (data) std::cout << data.value();
-            else std::cout << ColorRed << "unknown" << ColorReset;
+            else std::cout << "void";
         }
 
         void * build(Module & module) {
@@ -37,8 +37,15 @@ namespace neonc {
             // str
             if (data == "str") return module.dummy_builder->getPtrTy();
 
+            // void
+            if (!data) return llvm::Type::getVoidTy(*module.context);
+
             std::cerr << "ICE: unable to create type" << std::endl;
             exit(0);
+        }
+
+        const std::optional<std::string> & get_data() const {
+            return data;
         }
     private:
         std::optional<std::string> data = std::nullopt;

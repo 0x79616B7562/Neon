@@ -77,6 +77,7 @@ namespace neonc {
 
             auto func = llvm::Function::Create(
                 func_type,
+                identifier == "main" ? llvm::Function::ExternalLinkage :
                 is_public ? llvm::Function::ExternalLinkage : llvm::Function::PrivateLinkage,
                 identifier,
                 *module.module
