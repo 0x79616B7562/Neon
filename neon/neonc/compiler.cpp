@@ -35,7 +35,7 @@ namespace neonc {
         ast.finalize(module);
 
         module.verify();
-        target.optimize(module);
+        // target.optimize(module);
         module.dump();
 
         target.module_to_object_file(module, file_path);

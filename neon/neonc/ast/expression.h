@@ -87,21 +87,21 @@ namespace neonc {
 
                     for (uint32_t i = 0; i < call->nodes.size(); i++) {
                         if (auto expr = std::dynamic_pointer_cast<Expression>(call->nodes[i]); expr) {
-                            args.push_back(expr->build(module, module.module->getFunction(call->identifier)->getArg(i)->getType()));
-                        }
+                            llvm::Type * _t = nullptr;
 
-                        if (module.module->getFunction(call->identifier)->arg_size() < i - 1 && module.module->getFunction(call->identifier)->isVarArg())
-                            break;
-                    }
-
-                    if (module.module->getFunction(call->identifier)->isVarArg()) {
-                        for (uint32_t i = module.module->getFunction(call->identifier)->arg_size(); i < call->nodes.size(); i++) {
-                            auto expr = std::dynamic_pointer_cast<Expression>(call->nodes[i]);
-
-                            if (expr) {
-                                // TODO: get vaarg type
-                                args.push_back(expr->build(module, llvm::Type::getInt32Ty(*module.context)));
+                            if (i < module.module->getFunction(call->identifier)->arg_size()) {
+                                _t = module.module->getFunction(call->identifier)->getArg(i)->getType();
+                            } else {
+                                // TODO: get actual type of vaarg
+                                _t = llvm::Type::getInt32Ty(*module.context);
                             }
+
+                            if (_t == nullptr) {
+                                std::cerr << "ICE: call arg type is nullptr" << std::endl;
+                                exit(0);
+                            }
+
+                            args.push_back(expr->build(module, _t));
                         }
                     }
 

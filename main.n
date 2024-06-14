@@ -1,11 +1,16 @@
-pub fn printf(fmt: str, d: ...i32) i32;
+fn test(b: i32, c: f32, a: ...i32) i32 {
+    return 10
+}
 
-fn test(a: ...i32) {
+fn test3(a: ...i32) {
+}
+
+fn test2(a, b: i32) {
 }
 
 fn main() {
-    var b = 10
-    test(10, 20)
+    var t = test(10, 20, 30, 40, 50)
 
-    printf("hodnota: %d\n", b)
+    test3(10, 20, 30, 40, 50)
+    test2(10, 20)
 }

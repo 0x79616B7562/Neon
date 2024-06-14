@@ -90,10 +90,12 @@ namespace neonc {
     }
 
     void Target::optimize(Module & module) {
-        // for (auto & func : module.module->getFunctionList()) {
-        //     pass->fpm->run(func, *pass->fam);
-        // }
-        // TODO: this segfaults for some reason
+        for (auto & iterator : module.functions) {
+            pass->fpm->run(
+                *std::get<0>(std::get<0>(iterator.second)),
+                *pass->fam
+            );
+        }
     }
 
     void Target::module_to_object_file(Module & module, const std::string out) const {

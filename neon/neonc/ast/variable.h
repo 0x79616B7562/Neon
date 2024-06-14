@@ -23,7 +23,7 @@ namespace neonc {
         }
         
         virtual void dump(const uint32_t indentation) const {
-            std::cout << cli::indent(indentation) << (declare ? cli::colorize("let ", indentation) : "_") << (declare ? identifier : "");
+            std::cout << cli::indent(indentation) << (declare ? cli::colorize("var ", indentation) : "_") << (declare ? identifier : "");
 
             std::cout << ": ";
             if (type) type->dump(indentation);
@@ -44,8 +44,6 @@ namespace neonc {
             
             if (declare) {
                 auto alloca = module.get_builder()->CreateAlloca(_type);
-
-                module.local_variables[identifier] = alloca;
 
                 if (!nodes.empty()) {
                     if (auto expr = std::dynamic_pointer_cast<Expression>(nodes.back()); expr) {
@@ -72,6 +70,8 @@ namespace neonc {
                     //
                     else throw std::invalid_argument("ICE: unknown variable type to zero");
                 }
+
+                module.local_variables[identifier] = alloca;
             } else {
                 if (!nodes.empty()) {
                     if (auto expr = std::dynamic_pointer_cast<Expression>(nodes.back()); expr) {

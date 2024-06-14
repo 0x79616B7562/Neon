@@ -26,6 +26,8 @@ namespace neonc {
             if (type) {
                 if (is_variadic) {
                     std::cout << "..."; type->dump(indentation);
+                } else {
+                    type->dump(indentation);
                 }
             } else {
                 std::cout << ColorRed << "unknown" << ColorReset;

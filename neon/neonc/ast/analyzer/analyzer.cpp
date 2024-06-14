@@ -47,6 +47,8 @@ namespace neonc {
             if (auto _call = query_first(var, NodeId::Call); _call) {
                 auto funcs = query(root, NodeId::Function);
 
+                bool found = false;
+
                 for (auto fn : funcs) {
                     if (auto func = std::dynamic_pointer_cast<Function>(fn); func) {
                         if (auto call = std::dynamic_pointer_cast<Call>(_call.value()); call) { 
@@ -56,6 +58,8 @@ namespace neonc {
                                 } else {
                                     var->type = Type(std::nullopt, _call->get()->position);
                                 }
+
+                                found = true;
 
                                 break;
                             }
@@ -68,12 +72,16 @@ namespace neonc {
                         exit(0);
                     }
                 }
+
+                if (!found) {
+                    throw_error(std::dynamic_pointer_cast<Call>(_call.value())->position, "undefined function");
+                }
             } else if (auto _ident = query_first(var, NodeId::Identifier); _ident) {
                 if (auto ident = std::dynamic_pointer_cast<Identifier>(_ident.value()); ident) {
                     if (auto result = scope.find_variable(ident->identifier); result) {
                         var->type = result->get()->type;
                     } else {
-                        throw_error(ident->position, "undefined");
+                        throw_error(ident->position, "undefined variable");
                     }
                 } else {
                     std::cerr << "ICE: cannot cast node to identifier" << std::endl;
@@ -107,12 +115,7 @@ namespace neonc {
         const auto & type = var->type;
 
         if (!var->nodes.empty()) {
-            if (auto expr = std::dynamic_pointer_cast<Expression>(var->nodes.back()); expr) {
-                // TODO: need type checking for local variables to work on this
-            } else {
-                std::cerr << "ICE: cannot cast node to expression" << std::endl;
-                exit(0);
-            }
+            // TODO: somehow traverse expression to validate it
         }
     }
 }
